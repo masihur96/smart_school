@@ -20,6 +20,7 @@ import 'features/admin/providers/student_performance_provider.dart';
 import 'features/admin/providers/teacher_performance_provider.dart';
 import 'features/admin/providers/onboarding_provider.dart';
 import 'features/admin/providers/attendance_management_provider.dart';
+import 'features/admin/providers/academic_calendar_provider.dart';
 import 'features/auth/data/datasources/auth_remote_data_source.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/usecases/change_password_usecase.dart';
@@ -124,6 +125,7 @@ void main() async {
         ),
         ChangeNotifierProvider(create: (_) => RoutineNotifier()),
         ChangeNotifierProvider(create: (_) => ExamsNotifier()),
+        ChangeNotifierProvider(create: (_) => AcademicCalendarProvider()),
         ChangeNotifierProvider(create: (_) => AcademicBookNotifier()),
         ChangeNotifierProvider(
           create: (_) => HomeworkNotifier(

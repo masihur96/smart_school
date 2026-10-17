@@ -2044,5 +2044,21 @@
   "schoolInactiveMessage": "Your school account is currently inactive. Please communicate with SchoolCare support for assistance.",
   "biometricCredentialsExpired": "Biometric credentials expired. Please log in manually.",
   "signInToManageYourSchool": "Sign in to manage your school and academic workspace.",
-  "dontHaveAnAccount": "Don't have an account?"
+  "dontHaveAnAccount": "Don't have an account?",
+  "academicCalendar": "Academic Calendar",
+  "addAcademicEvent": "Add Event",
+  "editAcademicEvent": "Edit Event",
+  "deleteAcademicEvent": "Delete Event",
+  "deleteEventConfirmation": "Are you sure you want to delete this event?",
+  "eventTitle": "Title",
+  "eventCategory": "Category",
+  "isHoliday": "Holiday",
+  "markAsHoliday": "Mark as Holiday",
+  "allDay": "All Day",
+  "targetAudience": "Target Audience",
+  "academicYear": "Academic Year",
+  "term": "Term",
+  "location": "Location",
+  "attachment": "Attachment",
+  "noEventsFound": "No academic calendar events found"
 }

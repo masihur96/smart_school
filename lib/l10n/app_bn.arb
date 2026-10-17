@@ -1800,5 +1800,21 @@
   "schoolInactiveMessage": "আপনার স্কুল অ্যাকাউন্ট বর্তমানে নিষ্ক্রিয়। সহায়তার জন্য অনুগ্রহ করে স্কুলকেয়ার সাপোর্টের সাথে যোগাযোগ করুন।",
   "biometricCredentialsExpired": "বায়োমেট্রিক শংসাপত্রগুলির মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে ম্যানুয়ালি লগ ইন করুন।",
   "signInToManageYourSchool": "আপনার স্কুল এবং একাডেমিক কাজের জায়গা পরিচালনা করতে সাইন ইন করুন।",
-  "dontHaveAnAccount": "কোনো অ্যাকাউন্ট নেই?"
+  "dontHaveAnAccount": "কোনো অ্যাকাউন্ট নেই?",
+  "academicCalendar": "একাডেমিক ক্যালেন্ডার",
+  "addAcademicEvent": "ইভেন্ট যোগ করুন",
+  "editAcademicEvent": "ইভেন্ট সম্পাদনা করুন",
+  "deleteAcademicEvent": "ইভেন্ট মুছুন",
+  "deleteEventConfirmation": "আপনি কি নিশ্চিত যে আপনি এই ইভেন্টটি মুছে ফেলতে চান?",
+  "eventTitle": "শিরোনাম",
+  "eventCategory": "ক্যাটাগরি",
+  "isHoliday": "ছুটির দিন",
+  "markAsHoliday": "ছুটির দিন হিসেবে চিহ্নিত করুন",
+  "allDay": "সারাদিন",
+  "targetAudience": "টার্গেট অডিয়েন্স",
+  "academicYear": "শিক্ষাবর্ষ",
+  "term": "টার্ম",
+  "location": "স্থান",
+  "attachment": "সংযুক্তি",
+  "noEventsFound": "কোনো একাডেমিক ক্যালেন্ডার ইভেন্ট পাওয়া যায়নি"
 }

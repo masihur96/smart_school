@@ -4220,4 +4220,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dontHaveAnAccount => 'Don\'t have an account?';
+
+  @override
+  String get academicCalendar => 'Academic Calendar';
+
+  @override
+  String get addAcademicEvent => 'Add Event';
+
+  @override
+  String get editAcademicEvent => 'Edit Event';
+
+  @override
+  String get deleteAcademicEvent => 'Delete Event';
+
+  @override
+  String get deleteEventConfirmation =>
+      'Are you sure you want to delete this event?';
+
+  @override
+  String get eventTitle => 'Title';
+
+  @override
+  String get eventCategory => 'Category';
+
+  @override
+  String get isHoliday => 'Holiday';
+
+  @override
+  String get markAsHoliday => 'Mark as Holiday';
+
+  @override
+  String get allDay => 'All Day';
+
+  @override
+  String get academicYear => 'Academic Year';
+
+  @override
+  String get term => 'Term';
+
+  @override
+  String get location => 'Location';
+
+  @override
+  String get attachment => 'Attachment';
+
+  @override
+  String get noEventsFound => 'No academic calendar events found';
 }

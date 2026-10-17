@@ -198,4 +198,9 @@ class APIPath {
       "$baseUrl/wallet/transactions/$id?schoolId=$schoolId";
   static String walletUpdateTransaction(String id, String schoolId) =>
       "$baseUrl/wallet/transactions/$id?schoolId=$schoolId";
+
+  // Academic Calendar
+  static String academicCalendar = "$baseUrl/admin/academic-calendar";
+  static String academicCalendarItem(String id) =>
+      "$baseUrl/admin/academic-calendar/$id";
 }

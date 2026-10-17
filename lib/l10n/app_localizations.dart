@@ -7830,6 +7830,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Don\'t have an account?'**
   String get dontHaveAnAccount;
+
+  /// No description provided for @academicCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Calendar'**
+  String get academicCalendar;
+
+  /// No description provided for @addAcademicEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Event'**
+  String get addAcademicEvent;
+
+  /// No description provided for @editAcademicEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Event'**
+  String get editAcademicEvent;
+
+  /// No description provided for @deleteAcademicEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Event'**
+  String get deleteAcademicEvent;
+
+  /// No description provided for @deleteEventConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this event?'**
+  String get deleteEventConfirmation;
+
+  /// No description provided for @eventTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get eventTitle;
+
+  /// No description provided for @eventCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get eventCategory;
+
+  /// No description provided for @isHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday'**
+  String get isHoliday;
+
+  /// No description provided for @markAsHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Holiday'**
+  String get markAsHoliday;
+
+  /// No description provided for @allDay.
+  ///
+  /// In en, this message translates to:
+  /// **'All Day'**
+  String get allDay;
+
+  /// No description provided for @academicYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Year'**
+  String get academicYear;
+
+  /// No description provided for @term.
+  ///
+  /// In en, this message translates to:
+  /// **'Term'**
+  String get term;
+
+  /// No description provided for @location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get location;
+
+  /// No description provided for @attachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment'**
+  String get attachment;
+
+  /// No description provided for @noEventsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No academic calendar events found'**
+  String get noEventsFound;
 }
 
 class _AppLocalizationsDelegate

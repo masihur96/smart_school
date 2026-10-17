@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/academic_books/screens/academic_books_dashboard_screen.dart';
+import 'package:smart_school/features/admin/screens/academic_calendar_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
 import 'package:smart_school/features/admin/screens/bulk_sms_screen.dart';
 import 'package:smart_school/features/admin/screens/exam_management_screen.dart';
@@ -170,6 +171,12 @@ class AppDrawer extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => RoutineManagementScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.calendar_month, l10n.academicCalendar, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AcademicCalendarScreen()),
         );
       }, context),
       _buildDrawerItem(Icons.announcement, l10n.notices, () {

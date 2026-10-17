@@ -3113,7 +3113,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get attendanceSubmittedSuccess => 'উপস্থিতি সফলভাবে জমা দেওয়া হয়েছে';
 
   @override
-  String get targetAudience => 'লক্ষ্য দর্শক';
+  String get targetAudience => 'টার্গেট অডিয়েন্স';
 
   @override
   String get enterUserUuid => 'ব্যবহারকারীর UUID দিন';
@@ -4233,4 +4233,50 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get dontHaveAnAccount => 'কোনো অ্যাকাউন্ট নেই?';
+
+  @override
+  String get academicCalendar => 'একাডেমিক ক্যালেন্ডার';
+
+  @override
+  String get addAcademicEvent => 'ইভেন্ট যোগ করুন';
+
+  @override
+  String get editAcademicEvent => 'ইভেন্ট সম্পাদনা করুন';
+
+  @override
+  String get deleteAcademicEvent => 'ইভেন্ট মুছুন';
+
+  @override
+  String get deleteEventConfirmation =>
+      'আপনি কি নিশ্চিত যে আপনি এই ইভেন্টটি মুছে ফেলতে চান?';
+
+  @override
+  String get eventTitle => 'শিরোনাম';
+
+  @override
+  String get eventCategory => 'ক্যাটাগরি';
+
+  @override
+  String get isHoliday => 'ছুটির দিন';
+
+  @override
+  String get markAsHoliday => 'ছুটির দিন হিসেবে চিহ্নিত করুন';
+
+  @override
+  String get allDay => 'সারাদিন';
+
+  @override
+  String get academicYear => 'শিক্ষাবর্ষ';
+
+  @override
+  String get term => 'টার্ম';
+
+  @override
+  String get location => 'স্থান';
+
+  @override
+  String get attachment => 'সংযুক্তি';
+
+  @override
+  String get noEventsFound => 'কোনো একাডেমিক ক্যালেন্ডার ইভেন্ট পাওয়া যায়নি';
 }
