@@ -12,7 +12,20 @@
           "package_name": "net.schoolcare.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "2512295449-jinhp6mmh1993gb0c8eo6lkd145b2cp4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.schoolcare.app",
+            "certificate_hash": "b7493f11e75dde7c05eedb977d7c5892321e44e9"
+          }
+        },
+        {
+          "client_id": "2512295449-u3jekrd8fifsb41fpjlap831vgf1qrh4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDA5y1XV8Cdk0bXxOZxtOmzTk2WVte9xxM"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2512295449-u3jekrd8fifsb41fpjlap831vgf1qrh4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "2512295449-a4k559u6gdeh2bd80cv2lp6dkbqfu4q0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "net.schoolcare.app"
+              }
+            }
+          ]
         }
       }
     }
