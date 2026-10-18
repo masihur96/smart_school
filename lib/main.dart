@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -28,6 +30,7 @@ import 'features/auth/domain/usecases/get_profile_usecase.dart';
 import 'features/auth/domain/usecases/login_usecase.dart';
 import 'features/auth/domain/usecases/register_usecase.dart';
 import 'features/auth/providers/auth_provider.dart';
+import 'features/auth/services/google_auth_service.dart';
 import 'features/student/providers/student_attendance_provider.dart';
 import 'features/student/providers/student_homework_provider.dart';
 import 'features/student/providers/student_result_provider.dart';
@@ -73,6 +76,9 @@ void main() async {
   // Initialize Push Notifications
   final notificationService = NotificationService();
   await notificationService.initialize();
+
+  // Initialize Google Auth
+  unawaited(GoogleAuthService.initialize());
 
   final databaseService = DatabaseService();
   final dataProvider = DataProvider();

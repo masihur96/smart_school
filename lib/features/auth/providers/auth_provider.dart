@@ -7,6 +7,8 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 
+import 'package:uuid/uuid.dart';
+
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../models/user_model.dart';
@@ -16,6 +18,7 @@ import '../domain/usecases/change_password_usecase.dart';
 import '../domain/usecases/get_profile_usecase.dart';
 import '../domain/usecases/login_usecase.dart';
 import '../domain/usecases/register_usecase.dart';
+import '../services/google_auth_service.dart';
 
 class AuthNotifier extends ChangeNotifier {
   final LoginUseCase loginUseCase;
@@ -214,6 +217,147 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
+  Future<bool> loginWithGoogle() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final userCredential = await GoogleAuthService.signInWithGoogle();
+      if (userCredential == null || userCredential.user == null) {
+        // User cancelled the Google sign-in dialog
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      final firebaseUser = userCredential.user!;
+      final email = firebaseUser.email;
+      if (email == null || email.trim().isEmpty) {
+        throw Exception('No email address associated with this Google account.');
+      }
+
+      final cleanEmail = email.trim().toLowerCase();
+      final googlePassword = 'Google_${firebaseUser.uid}';
+
+      // 1. Try to log in directly to backend with the Google-associated password
+      bool loggedIn = false;
+      try {
+        await loginUseCase(cleanEmail, googlePassword);
+        loggedIn = true;
+      } catch (loginErr) {
+        log('Initial backend login with Google password failed: $loginErr');
+      }
+
+      // 2. If login failed, attempt to register the user in the backend
+      if (!loggedIn) {
+        try {
+          final registered = await registerUseCase(
+            name: (firebaseUser.displayName != null &&
+                    firebaseUser.displayName!.trim().isNotEmpty)
+                ? firebaseUser.displayName!.trim()
+                : cleanEmail.split('@').first,
+            email: cleanEmail,
+            password: googlePassword,
+            role: 'admin',
+            schoolId: const Uuid().v4(),
+            phone: firebaseUser.phoneNumber ?? '',
+          );
+          if (registered) {
+            await loginUseCase(cleanEmail, googlePassword);
+            loggedIn = true;
+          }
+        } catch (regErr) {
+          log('Backend registration with Google failed: $regErr');
+          final regErrStr = regErr.toString().toLowerCase();
+          if (regErrStr.contains('already exist') ||
+              regErrStr.contains('duplicate') ||
+              regErrStr.contains('conflict') ||
+              regErrStr.contains('registered')) {
+            throw Exception(
+              'An account with this email already exists with a password. Please sign in with your email and password.',
+            );
+          }
+          throw Exception(
+            regErr.toString().contains('Exception: ')
+                ? regErr.toString().split('Exception: ')[1]
+                : 'Failed to sign in with Google.',
+          );
+        }
+      }
+
+      // 3. Fetch full profile after successful login
+      final profile = await getProfileUseCase();
+
+      _user = User(
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
+        role: UserRole.values.firstWhere(
+          (e) => e.name == profile.role,
+          orElse: () => UserRole.student,
+        ),
+        schoolId: profile.schoolId,
+        classIds: profile.classIds,
+        sectionIds: profile.sectionIds,
+        phone: profile.phone,
+        rollNumber: profile.rollNumber,
+        designation: profile.designation,
+        isActive: profile.isActive,
+        avatar: (profile.avatar != null && profile.avatar!.isNotEmpty)
+            ? profile.avatar
+            : firebaseUser.photoURL,
+        createdAt: profile.createdAt != null
+            ? DateTime.tryParse(profile.createdAt!)
+            : null,
+        lat: profile.lat,
+        lon: profile.lon,
+        radius: profile.radius,
+        school: profile.school,
+        classEntity: profile.classEntity,
+        section: profile.section,
+      );
+
+      if ((_user?.role == UserRole.admin || _user?.role == UserRole.teacher) &&
+          _user?.schoolId != null) {
+        await _fetchAdminSubscription(_user!.schoolId!);
+      }
+
+      unawaited(
+        FirebaseAnalytics.instance
+            .setUserId(id: _user!.id)
+            .catchError((e) => log('setUserId error: $e')),
+      );
+      unawaited(
+        FirebaseAnalytics.instance
+            .logLogin(loginMethod: 'google')
+            .catchError((e) => log('logLogin error: $e')),
+      );
+
+      unawaited(
+        NotificationService()
+            .subscribeToUserTopics(_user!)
+            .catchError((e) => log('subscribeToUserTopics error: $e')),
+      );
+      unawaited(
+        NotificationService().registerTokenToBackend().catchError(
+          (e) => log('registerTokenToBackend error: $e'),
+        ),
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString().contains('Exception: ')
+          ? e.toString().split('Exception: ')[1]
+          : 'Google login failed';
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> register({
     required String name,
     required String email,
@@ -280,6 +424,12 @@ class AuthNotifier extends ChangeNotifier {
 
     // Clear local storage immediately to prevent race conditions with new logins.
     await StorageService.clear();
+
+    try {
+      await GoogleAuthService.signOut();
+    } catch (e) {
+      log("Google sign out error: $e");
+    }
 
     if (userToUnsubscribe != null) {
       try {

@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>2512295449-a4k559u6gdeh2bd80cv2lp6dkbqfu4q0.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.2512295449-a4k559u6gdeh2bd80cv2lp6dkbqfu4q0</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBqC0O7wd8ecxaKiiYoo1jjhElE0ZgoHbc</string>
 	<key>GCM_SENDER_ID</key>
@@ -9,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.smartSchool</string>
+	<string>net.schoolcare.app</string>
 	<key>PROJECT_ID</key>
 	<string>smart-school-eb7c5</string>
 	<key>STORAGE_BUCKET</key>

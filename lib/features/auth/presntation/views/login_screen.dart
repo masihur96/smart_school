@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/settings_provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -30,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordVisible = false;
   bool _canUseBiometrics = false;
   bool _isBiometricLoading = false;
+  bool _isGoogleLoading = false;
 
   /// Guards against double-navigation if build() fires multiple times
   /// while the subscription retry is in-flight.
@@ -250,6 +252,42 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // ─── Google login ───────────────────────────────────────────────────────────
+
+  Future<void> _googleLogin() async {
+    final authNotifier = context.read<AuthNotifier>();
+    if (_isGoogleLoading || authNotifier.isLoading) return;
+    if (!mounted) return;
+
+    authNotifier.clearError();
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      await authNotifier.loginWithGoogle();
+      // Navigation is handled reactively by build() watching authNotifier.user.
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
+    }
+  }
+
+  static const String _googleSvg = '''
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  <path fill="none" d="M0 0h48v48H0z"/>
+</svg>
+''';
+
+  Widget _buildGoogleLogo() {
+    return SvgPicture.string(
+      _googleSvg,
+      width: 22,
+      height: 22,
+    );
+  }
+
   // ─── Build ──────────────────────────────────────────────────────────────────
 
 
@@ -296,6 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.red,
           ),
         );
+        authNotifier.clearError();
       }
     });
 
@@ -548,7 +587,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: authNotifier.isLoading ? null : _login,
+                          onPressed: (authNotifier.isLoading || _isGoogleLoading)
+                              ? null
+                              : _login,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.purple,
                             foregroundColor: Colors.white,
@@ -562,7 +603,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             shadowColor: Colors.purple.withOpacity(0.4),
                           ),
                           child: (authNotifier.isLoading &&
-                                  !_isBiometricLoading)
+                                  !_isBiometricLoading &&
+                                  !_isGoogleLoading)
                               ? const SizedBox(
                                   height: 22,
                                   width: 22,
@@ -624,7 +666,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 )
                               : IconButton(
-                                  onPressed: authNotifier.isLoading
+                                  onPressed: (authNotifier.isLoading || _isGoogleLoading)
                                       ? null
                                       : _biometricLogin,
                                   icon: const Icon(
@@ -637,6 +679,113 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ],
                     ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ─── OR Divider ──────────────────────────────────────────────
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          color: isDark
+                              ? const Color(0xFF2C3242)
+                              : Colors.grey[300],
+                          thickness: 1,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        child: Text(
+                          (Localizations.localeOf(context).languageCode == 'bn')
+                              ? 'অথবা'
+                              : 'OR',
+                          style: TextStyle(
+                            color:
+                                isDark ? Colors.grey[400] : Colors.grey[500],
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          color: isDark
+                              ? const Color(0xFF2C3242)
+                              : Colors.grey[300],
+                          thickness: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ─── Google Login Button ─────────────────────────────────────
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: OutlinedButton(
+                      onPressed: (authNotifier.isLoading || _isGoogleLoading)
+                          ? null
+                          : _googleLogin,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor:
+                            isDark ? const Color(0xFF1E222D) : Colors.white,
+                        foregroundColor:
+                            isDark ? Colors.white : const Color(0xFF2D3142),
+                        disabledBackgroundColor: isDark
+                            ? const Color(0xFF1E222D).withOpacity(0.6)
+                            : Colors.white.withOpacity(0.6),
+                        side: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF333846)
+                              : const Color(0xFFE2E4EB),
+                          width: 1.2,
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: _isGoogleLoading
+                          ? const SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.purple,
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildGoogleLogo(),
+                                const SizedBox(width: 12),
+                                Text(
+                                  (Localizations.localeOf(context).languageCode ==
+                                          'bn')
+                                      ? 'গুগল দিয়ে সাইন ইন করুন'
+                                      : 'Sign in with Google',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.3,
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF2D3142),
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
                   ),
                   const SizedBox(height: 24),
 
