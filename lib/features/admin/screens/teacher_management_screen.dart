@@ -1007,6 +1007,32 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                     ? () => _launchUrl('tel:${user!.phone}')
                     : null,
               ),
+              if (teacher.address != null && teacher.address!.isNotEmpty)
+                _buildDetailItem(
+                  Icons.home_outlined,
+                  'Address',
+                  teacher.address!,
+                ),
+              if (teacher.guardianPhone != null && teacher.guardianPhone!.isNotEmpty)
+                _buildDetailItem(
+                  Icons.contact_phone_outlined,
+                  'Guardian Phone',
+                  teacher.guardianPhone!,
+                  actionIcon: Icons.call,
+                  onTap: () => _launchUrl('tel:${teacher.guardianPhone}'),
+                ),
+              if (teacher.fatherName != null && teacher.fatherName!.isNotEmpty)
+                _buildDetailItem(
+                  Icons.person_outline,
+                  "Father's Name",
+                  teacher.fatherName!,
+                ),
+              if (teacher.motherName != null && teacher.motherName!.isNotEmpty)
+                _buildDetailItem(
+                  Icons.person_outline,
+                  "Mother's Name",
+                  teacher.motherName!,
+                ),
               const SizedBox(height: 20),
               const Text(
                 'Academic Assignment',

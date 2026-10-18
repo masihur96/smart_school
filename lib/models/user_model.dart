@@ -23,6 +23,10 @@ class User {
   final School? school;
   final ClassRoom? classEntity;
   final Section? section;
+  final String? address;
+  final String? fatherName;
+  final String? motherName;
+  final String? guardianPhone;
 
   User({
     required this.id,
@@ -45,6 +49,10 @@ class User {
     this.school,
     this.classEntity,
     this.section,
+    this.address,
+    this.fatherName,
+    this.motherName,
+    this.guardianPhone,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -85,6 +93,10 @@ class User {
       school: json['school'] != null ? School.fromJson(json['school']) : null,
       classEntity: json['class'] != null ? ClassRoom.fromJson(json['class']) : null,
       section: json['section'] != null ? Section.fromJson(json['section']) : null,
+      address: json['address']?.toString(),
+      fatherName: json['fatherName']?.toString(),
+      motherName: json['motherName']?.toString(),
+      guardianPhone: json['guardianPhone']?.toString() ?? json['guardianContact']?.toString(),
     );
   }
 
@@ -111,6 +123,10 @@ class User {
       'school': school?.toJson(),
       'class': classEntity?.toJson(),
       'section': section?.toJson(),
+      if (address != null) 'address': address,
+      if (fatherName != null) 'fatherName': fatherName,
+      if (motherName != null) 'motherName': motherName,
+      if (guardianPhone != null) 'guardianPhone': guardianPhone,
     };
   }
 }

@@ -145,13 +145,38 @@ class StudentDetailScreen extends StatelessWidget {
                     _buildInfoRow(
                       Icons.contact_phone,
                       'Guardian Contact',
-                      student.guardianContact,
+                      student.guardianPhone ?? (student.guardianContact.isNotEmpty ? student.guardianContact : 'N/A'),
                       actionIcon: Icons.call,
-                      onTap: student.guardianContact.isNotEmpty
-                          ? () => _launchUrl('tel:${student.guardianContact}')
+                      onTap: (student.guardianPhone ?? student.guardianContact).isNotEmpty
+                          ? () => _launchUrl('tel:${student.guardianPhone ?? student.guardianContact}')
                           : null,
                     ),
+                    if (student.address != null && student.address!.isNotEmpty)
+                      _buildInfoRow(
+                        Icons.home,
+                        'Address',
+                        student.address!,
+                      ),
                   ]),
+                  if ((student.fatherName != null && student.fatherName!.isNotEmpty) ||
+                      (student.motherName != null && student.motherName!.isNotEmpty)) ...[
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Family Information'),
+                    _buildInfoCard([
+                      if (student.fatherName != null && student.fatherName!.isNotEmpty)
+                        _buildInfoRow(
+                          Icons.person,
+                          "Father's Name",
+                          student.fatherName!,
+                        ),
+                      if (student.motherName != null && student.motherName!.isNotEmpty)
+                        _buildInfoRow(
+                          Icons.person_outline,
+                          "Mother's Name",
+                          student.motherName!,
+                        ),
+                    ]),
+                  ],
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,

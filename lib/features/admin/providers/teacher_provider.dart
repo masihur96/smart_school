@@ -216,12 +216,15 @@ class TeachersNotifier extends ChangeNotifier {
     required String role,
     required String schoolId,
     required String phone,
-
     required String designation,
     double? lat,
     double? lon,
     double? radius,
     File? imageFile,
+    String? address,
+    String? fatherName,
+    String? motherName,
+    String? guardianPhone,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -239,6 +242,13 @@ class TeachersNotifier extends ChangeNotifier {
         "phone": phone,
         "designation": designation,
         "isActive": true,
+        if (address != null && address.isNotEmpty) "address": address,
+        if (fatherName != null && fatherName.isNotEmpty) "fatherName": fatherName,
+        if (motherName != null && motherName.isNotEmpty) "motherName": motherName,
+        if (guardianPhone != null && guardianPhone.isNotEmpty) ...{
+          "guardianPhone": guardianPhone,
+          "guardianContact": guardianPhone,
+        },
         if (lat != null) "lat": lat,
         if (lon != null) "lon": lon,
         if (radius != null) "radius": radius,
@@ -325,6 +335,10 @@ class TeachersNotifier extends ChangeNotifier {
     double? lon,
     double? radius,
     File? imageFile,
+    String? address,
+    String? fatherName,
+    String? motherName,
+    String? guardianPhone,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -339,6 +353,13 @@ class TeachersNotifier extends ChangeNotifier {
         "phone": phone,
         "designation": designation,
         "role": role,
+        if (address != null) "address": address,
+        if (fatherName != null) "fatherName": fatherName,
+        if (motherName != null) "motherName": motherName,
+        if (guardianPhone != null) ...{
+          "guardianPhone": guardianPhone,
+          "guardianContact": guardianPhone,
+        },
         if (password != null && password.isNotEmpty) "password": password,
         if (lat != null) "lat": lat,
         if (lon != null) "lon": lon,
@@ -409,6 +430,10 @@ class TeachersNotifier extends ChangeNotifier {
               phone: phone,
               schoolId: oldTeacher.user?.schoolId,
               avatar: updatedAvatar,
+              address: address ?? oldTeacher.user?.address,
+              fatherName: fatherName ?? oldTeacher.user?.fatherName,
+              motherName: motherName ?? oldTeacher.user?.motherName,
+              guardianPhone: guardianPhone ?? oldTeacher.user?.guardianPhone,
             ),
           );
           _dbService.teachers[index] = updatedTeacher;

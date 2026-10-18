@@ -36,6 +36,11 @@ class Teacher {
 
   bool get isDeleted => deletedAt != null;
 
+  String? get address => user?.address;
+  String? get fatherName => user?.fatherName;
+  String? get motherName => user?.motherName;
+  String? get guardianPhone => user?.guardianPhone;
+
   factory Teacher.fromJson(Map<String, dynamic> json) {
     // Parse embedded classes array (present in flat API response)
     final List<ClassRoom> classes = (json['classes'] as List<dynamic>? ?? [])
@@ -51,6 +56,14 @@ class Teacher {
     final classIds = json['classIds'] as List<dynamic>?;
     final sectionIds = json['sectionIds'] as List<dynamic>?;
 
+    final Map<String, dynamic> rawUserMap = json['user'] is Map<String, dynamic>
+        ? Map<String, dynamic>.from(json['user'])
+        : Map<String, dynamic>.from(json);
+    rawUserMap['address'] ??= json['address'];
+    rawUserMap['fatherName'] ??= json['fatherName'];
+    rawUserMap['motherName'] ??= json['motherName'];
+    rawUserMap['guardianPhone'] ??= json['guardianPhone'] ?? json['guardianContact'];
+
     return Teacher(
       userId: json['userId'] ?? json['id'] ?? json['_id'] ?? '',
       designation: json['designation'] ?? '',
@@ -64,7 +77,7 @@ class Teacher {
       assignedSubjects: json['assignedSubjects'] != null 
           ? (json['assignedSubjects'] as List).map((e) => AssignedSubject.fromJson(e)).toList()
           : [],
-      user: json['user'] != null ? User.fromJson(json['user']) : User.fromJson(json),
+      user: User.fromJson(rawUserMap),
       lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
       lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
       radius: json['radius'] != null ? double.tryParse(json['radius'].toString()) : null,
@@ -83,6 +96,10 @@ class Teacher {
       'isActive': isActive,
       'assignedSubjects': assignedSubjects.map((e) => e.toJson()).toList(),
       if (user != null) 'user': user!.toJson(),
+      if (address != null) 'address': address,
+      if (fatherName != null) 'fatherName': fatherName,
+      if (motherName != null) 'motherName': motherName,
+      if (guardianPhone != null) 'guardianPhone': guardianPhone,
       if (lat != null) 'lat': lat,
       if (lon != null) 'lon': lon,
       if (radius != null) 'radius': radius,

@@ -36,6 +36,10 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   final _latController = TextEditingController();
   final _lonController = TextEditingController();
   final _radiusController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _fatherNameController = TextEditingController();
+  final _motherNameController = TextEditingController();
+  final _guardianPhoneController = TextEditingController();
 
   final List<AssignedSubject> _assignedSubjects = [];
   bool _obscurePassword = true;
@@ -45,6 +49,18 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   String _selectedRole = 'teacher';
 
   bool get isEditing => widget.teacher != null;
+
+  String? _validateOptionalPhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    final cleanPhone = value.trim().replaceAll(RegExp(r'[\s-]'), '');
+    final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
+    if (!phoneRegex.hasMatch(cleanPhone)) {
+      return 'Please enter a valid phone number';
+    }
+    return null;
+  }
 
   String? _validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -122,6 +138,10 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       _emailController.text = teacher.user?.email ?? '';
       _phoneController.text = teacher.user?.phone ?? '';
       _designationController.text = teacher.designation;
+      _addressController.text = teacher.address ?? teacher.user?.address ?? '';
+      _fatherNameController.text = teacher.fatherName ?? teacher.user?.fatherName ?? '';
+      _motherNameController.text = teacher.motherName ?? teacher.user?.motherName ?? '';
+      _guardianPhoneController.text = teacher.guardianPhone ?? teacher.user?.guardianPhone ?? '';
 
       _latController.text = teacher.lat?.toString() ?? '';
       _lonController.text = teacher.lon?.toString() ?? '';
@@ -183,6 +203,10 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     _latController.dispose();
     _lonController.dispose();
     _radiusController.dispose();
+    _addressController.dispose();
+    _fatherNameController.dispose();
+    _motherNameController.dispose();
+    _guardianPhoneController.dispose();
     super.dispose();
   }
 
@@ -323,6 +347,10 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             lon: double.tryParse(_lonController.text),
             radius: double.tryParse(_radiusController.text),
             imageFile: _imageFile,
+            address: _addressController.text.trim(),
+            fatherName: _fatherNameController.text.trim(),
+            motherName: _motherNameController.text.trim(),
+            guardianPhone: _guardianPhoneController.text.trim(),
           );
         } else {
           await teacherNotifier.addTeacherToAPI(
@@ -337,6 +365,10 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             lon: double.tryParse(_lonController.text),
             radius: double.tryParse(_radiusController.text),
             imageFile: _imageFile,
+            address: _addressController.text.trim(),
+            fatherName: _fatherNameController.text.trim(),
+            motherName: _motherNameController.text.trim(),
+            guardianPhone: _guardianPhoneController.text.trim(),
           );
         }
 
@@ -560,6 +592,79 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                         }
                         return null;
                       },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Address & Family Details Section
+            _buildSectionHeader(
+              context,
+              'Address & Family Details',
+              Icons.home_outlined,
+            ),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _addressController,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)?.address ?? 'Address',
+                        prefixIcon: const Icon(Icons.home_outlined),
+                        hintText: '123 Main St, Springfield',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _fatherNameController,
+                      decoration: InputDecoration(
+                        labelText: "Father's Name",
+                        prefixIcon: const Icon(Icons.person_outline),
+                        hintText: 'Robert Doe',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _motherNameController,
+                      decoration: InputDecoration(
+                        labelText: "Mother's Name",
+                        prefixIcon: const Icon(Icons.person_outline),
+                        hintText: 'Jane Doe',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _guardianPhoneController,
+                      decoration: InputDecoration(
+                        labelText: 'Guardian Phone',
+                        prefixIcon: const Icon(Icons.phone_outlined),
+                        hintText: '+1234567890',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.next,
+                      validator: _validateOptionalPhone,
                     ),
                   ],
                 ),

@@ -32,6 +32,11 @@ class Student {
   /// Returns the first section name from embedded data, or null if not available.
   String? get sectionName => embeddedSections.isNotEmpty ? embeddedSections.first.name : null;
 
+  String? get address => user?.address;
+  String? get fatherName => user?.fatherName;
+  String? get motherName => user?.motherName;
+  String? get guardianPhone => user?.guardianPhone ?? (guardianContact.isNotEmpty ? guardianContact : null);
+
   factory Student.fromJson(Map<String, dynamic> json) {
     // Parse embedded classes array (present in flat API response)
     final List<ClassRoom> classes = (json['classes'] as List<dynamic>? ?? [])
@@ -47,6 +52,14 @@ class Student {
     final classIds = json['classIds'] as List<dynamic>?;
     final sectionIds = json['sectionIds'] as List<dynamic>?;
 
+    final Map<String, dynamic> rawUserMap = json['user'] is Map<String, dynamic>
+        ? Map<String, dynamic>.from(json['user'])
+        : Map<String, dynamic>.from(json);
+    rawUserMap['address'] ??= json['address'];
+    rawUserMap['fatherName'] ??= json['fatherName'];
+    rawUserMap['motherName'] ??= json['motherName'];
+    rawUserMap['guardianPhone'] ??= json['guardianPhone'] ?? json['guardianContact'];
+
     return Student(
       userId: json['userId']?.toString() ?? json['id']?.toString() ?? '',
       rollId: json['rollId']?.toString() ?? json['rollNumber']?.toString() ?? '',
@@ -56,9 +69,12 @@ class Student {
       sectionId: json['sectionId']?.toString() ??
           (sectionIds?.isNotEmpty == true ? sectionIds!.first.toString() : '') ??
           (sections.isNotEmpty ? sections.first.id : ''),
-      guardianContact: json['guardianContact']?.toString() ?? json['phone']?.toString() ?? '',
+      guardianContact: json['guardianPhone']?.toString() ??
+          json['guardianContact']?.toString() ??
+          json['phone']?.toString() ??
+          '',
       isActive: json['isActive'] ?? true,
-      user: json['user'] != null ? User.fromJson(json['user']) : User.fromJson(json),
+      user: User.fromJson(rawUserMap),
       embeddedClasses: classes,
       embeddedSections: sections,
     );
@@ -71,6 +87,10 @@ class Student {
       'classId': classId,
       'sectionId': sectionId,
       'guardianContact': guardianContact,
+      if (guardianPhone != null) 'guardianPhone': guardianPhone,
+      if (address != null) 'address': address,
+      if (fatherName != null) 'fatherName': fatherName,
+      if (motherName != null) 'motherName': motherName,
       'isActive': isActive,
       if (user != null) 'user': user!.toJson(),
     };

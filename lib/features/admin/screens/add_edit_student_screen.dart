@@ -32,6 +32,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   final _phoneController = TextEditingController();
   final _aboutController = TextEditingController();
   final _rollIdController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _fatherNameController = TextEditingController();
+  final _motherNameController = TextEditingController();
+  final _guardianPhoneController = TextEditingController();
 
   final List<String> _selectedClassIds = [];
   final List<String> _selectedSectionIds = [];
@@ -40,6 +44,18 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   bool _isLoading = false;
   File? _imageFile;
   String? _existingImageUrl;
+
+  String? _validateOptionalPhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    final cleanPhone = value.trim().replaceAll(RegExp(r'[\s-]'), '');
+    final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
+    if (!phoneRegex.hasMatch(cleanPhone)) {
+      return 'Please enter a valid phone number';
+    }
+    return null;
+  }
 
   String? _validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -121,9 +137,15 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       final s = widget.student!;
       _nameController.text = s.user?.name ?? '';
       _emailController.text = s.user?.email ?? '';
-      _phoneController.text = s.user?.phone ?? s.guardianContact;
+      _phoneController.text = (s.user?.phone != null && s.user!.phone!.isNotEmpty)
+          ? s.user!.phone!
+          : s.guardianContact;
       _aboutController.text = s.user?.designation ?? '';
       _rollIdController.text = s.rollId;
+      _addressController.text = s.address ?? s.user?.address ?? '';
+      _fatherNameController.text = s.fatherName ?? s.user?.fatherName ?? '';
+      _motherNameController.text = s.motherName ?? s.user?.motherName ?? '';
+      _guardianPhoneController.text = s.guardianPhone ?? s.user?.guardianPhone ?? s.guardianContact;
       final avatar = s.user?.avatar?.trim();
       _existingImageUrl = _isValidImageUrl(avatar) ? avatar : null;
 
@@ -210,6 +232,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _phoneController.dispose();
     _aboutController.dispose();
     _rollIdController.dispose();
+    _addressController.dispose();
+    _fatherNameController.dispose();
+    _motherNameController.dispose();
+    _guardianPhoneController.dispose();
     super.dispose();
   }
 
@@ -286,6 +312,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             rollId: _rollIdController.text.trim(),
             designation: _aboutController.text.trim(),
             imageFile: _imageFile,
+            address: _addressController.text.trim(),
+            fatherName: _fatherNameController.text.trim(),
+            motherName: _motherNameController.text.trim(),
+            guardianPhone: _guardianPhoneController.text.trim(),
           );
         } else {
           await context.read<StudentsNotifier>().addStudentToAPI(
@@ -300,6 +330,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             rollId: _rollIdController.text.trim(),
             designation: _aboutController.text.trim(),
             imageFile: _imageFile,
+            address: _addressController.text.trim(),
+            fatherName: _fatherNameController.text.trim(),
+            motherName: _motherNameController.text.trim(),
+            guardianPhone: _guardianPhoneController.text.trim(),
           );
         }
 
@@ -533,6 +567,48 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               keyboardType: TextInputType.phone,
               textInputAction: TextInputAction.next,
               validator: _validatePhone,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _guardianPhoneController,
+              decoration: const InputDecoration(
+                labelText: 'Guardian Phone',
+                prefixIcon: Icon(Icons.contact_phone_outlined),
+                hintText: '+1234567890',
+              ),
+              keyboardType: TextInputType.phone,
+              textInputAction: TextInputAction.next,
+              validator: _validateOptionalPhone,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _fatherNameController,
+              decoration: const InputDecoration(
+                labelText: "Father's Name",
+                prefixIcon: Icon(Icons.person_outline),
+                hintText: 'Robert Doe',
+              ),
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _motherNameController,
+              decoration: const InputDecoration(
+                labelText: "Mother's Name",
+                prefixIcon: Icon(Icons.person_outline),
+                hintText: 'Jane Doe',
+              ),
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _addressController,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)?.address ?? 'Address',
+                prefixIcon: const Icon(Icons.home_outlined),
+                hintText: '123 Main St, Springfield',
+              ),
+              textInputAction: TextInputAction.next,
             ),
 
             const SizedBox(height: 16),

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+import 'package:smart_school/models/user_model.dart';
 
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
@@ -335,6 +336,10 @@ class StudentsNotifier extends ChangeNotifier {
     List<String>? sectionIds,
     String? rollId,
     File? imageFile,
+    String? address,
+    String? fatherName,
+    String? motherName,
+    String? guardianPhone,
   }) async {
     final token = await StorageService.getToken();
     if (token == null) throw Exception('No auth token found');
@@ -347,6 +352,13 @@ class StudentsNotifier extends ChangeNotifier {
       "schoolId": schoolId,
       "phone": phone,
       "designation": designation,
+      if (address != null && address.isNotEmpty) "address": address,
+      if (fatherName != null && fatherName.isNotEmpty) "fatherName": fatherName,
+      if (motherName != null && motherName.isNotEmpty) "motherName": motherName,
+      if (guardianPhone != null && guardianPhone.isNotEmpty) ...{
+        "guardianPhone": guardianPhone,
+        "guardianContact": guardianPhone,
+      },
     };
 
     if (classIds != null && classIds.isNotEmpty) {
@@ -427,6 +439,10 @@ class StudentsNotifier extends ChangeNotifier {
     String? rollId,
     required String designation,
     File? imageFile,
+    String? address,
+    String? fatherName,
+    String? motherName,
+    String? guardianPhone,
   }) async {
     final token = await StorageService.getToken();
     if (token == null) throw Exception('No auth token found');
@@ -436,6 +452,13 @@ class StudentsNotifier extends ChangeNotifier {
       "email": email,
       "phone": phone,
       "designation": designation,
+      if (address != null) "address": address,
+      if (fatherName != null) "fatherName": fatherName,
+      if (motherName != null) "motherName": motherName,
+      if (guardianPhone != null) ...{
+        "guardianPhone": guardianPhone,
+        "guardianContact": guardianPhone,
+      },
     };
     if (password != null && password.isNotEmpty) {
       dataMap["password"] = password;
@@ -498,6 +521,45 @@ class StudentsNotifier extends ChangeNotifier {
 
     if (response != null && response.statusCode == 200) {
       log('Successfully updated student');
+      final index = _dbService.students.indexWhere((s) => s.userId == userId);
+      if (index != -1) {
+        final old = _dbService.students[index];
+        final updatedStudent = Student(
+          userId: userId,
+          rollId: rollId ?? old.rollId,
+          classId: (classIds != null && classIds.isNotEmpty)
+              ? classIds.first
+              : old.classId,
+          sectionId: (sectionIds != null && sectionIds.isNotEmpty)
+              ? sectionIds.first
+              : old.sectionId,
+          guardianContact: guardianPhone ?? old.guardianContact,
+          isActive: old.isActive,
+          embeddedClasses: old.embeddedClasses,
+          embeddedSections: old.embeddedSections,
+          user: User(
+            id: userId,
+            name: name,
+            email: email,
+            role: old.user?.role ?? UserRole.student,
+            avatar: dataMap['avatar'] ?? old.user?.avatar,
+            schoolId: old.user?.schoolId,
+            classIds: classIds ?? old.user?.classIds ?? [],
+            sectionIds: sectionIds ?? old.user?.sectionIds ?? [],
+            phone: phone,
+            rollNumber: rollId ?? old.user?.rollNumber,
+            designation: designation,
+            isActive: old.user?.isActive,
+            address: address ?? old.user?.address,
+            fatherName: fatherName ?? old.user?.fatherName,
+            motherName: motherName ?? old.user?.motherName,
+            guardianPhone: guardianPhone ?? old.user?.guardianPhone,
+          ),
+        );
+        _dbService.students[index] = updatedStudent;
+        _students = [..._dbService.students];
+        notifyListeners();
+      }
     } else {
       log('Error updating student: ${response?.data}');
       throw Exception('Failed to update student: ${response?.data}');
