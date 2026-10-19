@@ -18,6 +18,23 @@ import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 
+enum ReportCardViewMode {
+  studentWise,
+  classResultSheet,
+}
+
+class _ResultSheetSubject {
+  final String id;
+  final String name;
+  final double maxMarks;
+
+  _ResultSheetSubject({
+    required this.id,
+    required this.name,
+    this.maxMarks = 100.0,
+  });
+}
+
 class GenerateReportCardScreen extends StatefulWidget {
   final Exam exam;
   final List<Student> students;
@@ -34,6 +51,7 @@ class GenerateReportCardScreen extends StatefulWidget {
 }
 
 class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
+  ReportCardViewMode _viewMode = ReportCardViewMode.studentWise;
   String? _selectedClassId;
   String? _selectedSectionId;
   late List<Student> _currentStudents;
@@ -117,13 +135,21 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     final allSections = sectionSetupNotifier.sections;
 
     try {
-      final bytes = await _generateReportCardsPdf(
-        PdfPageFormat.a4,
-        school,
-        allSubjects,
-        allClasses,
-        allSections,
-      );
+      final bytes = _viewMode == ReportCardViewMode.studentWise
+          ? await _generateReportCardsPdf(
+              PdfPageFormat.a4,
+              school,
+              allSubjects,
+              allClasses,
+              allSections,
+            )
+          : await _generateClassResultSheetPdf(
+              PdfPageFormat.a4.landscape,
+              school,
+              allSubjects,
+              allClasses,
+              allSections,
+            );
       if (mounted) {
         setState(() {
           _pdfBytes = bytes;
@@ -173,9 +199,11 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _currentStudents.length == 1
-              ? 'Report Card Preview'
-              : 'Report Cards (${_currentStudents.length})',
+          _viewMode == ReportCardViewMode.studentWise
+              ? (_currentStudents.length == 1
+                  ? 'Report Card Preview'
+                  : 'Report Cards (${_currentStudents.length})')
+              : 'Class Result Sheet (${_currentStudents.length})',
         ),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
@@ -202,9 +230,18 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
             icon: const Icon(Icons.share),
             onPressed: () async {
               if (_pdfBytes != null) {
+                final className = _selectedClassId != null &&
+                        uniqueClasses.containsKey(_selectedClassId)
+                    ? uniqueClasses[_selectedClassId]!
+                    : 'Class';
+                final cleanClassName =
+                    className.replaceAll(RegExp(r'\s+'), '_');
+                final filename = _viewMode == ReportCardViewMode.studentWise
+                    ? 'report_cards_$cleanClassName.pdf'
+                    : 'result_sheet_$cleanClassName.pdf';
                 await Printing.sharePdf(
                   bytes: _pdfBytes!,
-                  filename: 'report_cards.pdf',
+                  filename: filename,
                 );
               }
             },
@@ -214,6 +251,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       ),
       body: Column(
         children: [
+          _buildModeSelector(),
           if (_showFilters) _buildFilters(uniqueClasses, uniqueSections),
           Expanded(
             child: _isLoading || _pdfBytes == null
@@ -225,6 +263,37 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                 : pdfx.PdfViewPinch(controller: _pdfController!),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildModeSelector() {
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: SegmentedButton<ReportCardViewMode>(
+        segments: const [
+          ButtonSegment(
+            value: ReportCardViewMode.studentWise,
+            label: Text('Student Report Cards'),
+            icon: Icon(Icons.badge_outlined),
+          ),
+          ButtonSegment(
+            value: ReportCardViewMode.classResultSheet,
+            label: Text('Class Result Sheet'),
+            icon: Icon(Icons.table_chart_outlined),
+          ),
+        ],
+        selected: {_viewMode},
+        onSelectionChanged: (newSelection) {
+          if (newSelection.first != _viewMode) {
+            setState(() {
+              _viewMode = newSelection.first;
+            });
+            _generatePdf();
+          }
+        },
       ),
     );
   }
@@ -496,6 +565,1168 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     }
 
     return pdf.save();
+  }
+
+  Future<Uint8List> _generateClassResultSheetPdf(
+    PdfPageFormat format,
+    School? school,
+    List<Subject> allSubjects,
+    List<ClassRoom> allClasses,
+    List<Section> allSections,
+  ) async {
+    final pdf = pw.Document();
+
+    final schoolName = school?.name ?? 'Smart School';
+    final schoolLogoUrl = school?.avatar ?? '';
+    final schoolAddress = school?.address ?? '';
+    final schoolPhone = school?.phone ?? '';
+    final schoolEmail = school?.email ?? '';
+
+    pw.ImageProvider? schoolLogo;
+    if (schoolLogoUrl.isNotEmpty) {
+      try {
+        schoolLogo = await PdfImageHelper.getCachedImageProvider(schoolLogoUrl);
+      } catch (e) {
+        // Fallback if image fails to load
+      }
+    }
+
+    final allResults = [...widget.exam.results, ..._fetchedResults];
+
+    bool matchesStudent(Result r, Student student) {
+      if (r.studentId.isNotEmpty) {
+        if (r.studentId == student.userId) return true;
+        if (student.user != null && r.studentId == student.user!.id) {
+          return true;
+        }
+        if (r.studentId == student.rollId) return true;
+      }
+      return false;
+    }
+
+    // 1. Sort students by Roll Number
+    final sortedStudents = List<Student>.from(_currentStudents)
+      ..sort((a, b) {
+        final rA = int.tryParse(a.rollId.trim());
+        final rB = int.tryParse(b.rollId.trim());
+        if (rA != null && rB != null) return rA.compareTo(rB);
+        if (rA != null) return -1;
+        if (rB != null) return 1;
+        return (a.user?.name ?? '').compareTo(b.user?.name ?? '');
+      });
+
+    if (sortedStudents.isEmpty) {
+      pdf.addPage(
+        pw.Page(
+          pageFormat: format,
+          margin: const pw.EdgeInsets.all(20),
+          build: (context) => pw.Center(
+            child: pw.Text(
+              'No student records found for the selected class/section.',
+              style: pw.TextStyle(
+                fontSize: 14,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.grey700,
+              ),
+            ),
+          ),
+        ),
+      );
+      return pdf.save();
+    }
+
+    // 2. Resolve Class and Section name
+    String resolvedClassName = 'All Classes';
+    if (_selectedClassId != null) {
+      try {
+        resolvedClassName = widget.exam.assignments
+            .firstWhere((a) => a.classId == _selectedClassId)
+            .className;
+      } catch (_) {
+        try {
+          resolvedClassName =
+              allClasses.firstWhere((c) => c.id == _selectedClassId).name;
+        } catch (_) {}
+      }
+    } else if (sortedStudents.isNotEmpty) {
+      resolvedClassName = _resolveClassName(
+        sortedStudents.first,
+        _selectedClassId,
+        allClasses,
+        widget.exam.assignments,
+      );
+    }
+
+    String resolvedSectionName = 'All Sections';
+    if (_selectedSectionId != null) {
+      try {
+        resolvedSectionName =
+            allSections.firstWhere((s) => s.id == _selectedSectionId).name;
+      } catch (_) {
+        try {
+          resolvedSectionName = widget.exam.assignments
+                  .firstWhere((a) => a.sectionId == _selectedSectionId)
+                  .sectionName ??
+              'All Sections';
+        } catch (_) {}
+      }
+    } else if (sortedStudents.isNotEmpty &&
+        sortedStudents.first.sectionName != null &&
+        sortedStudents.first.sectionName!.isNotEmpty) {
+      resolvedSectionName = sortedStudents.first.sectionName!;
+    }
+
+    // 3. Determine unique subjects for this class and exam
+    final subjectsMap = <String, _ResultSheetSubject>{};
+
+    for (var a in widget.exam.assignments) {
+      final matchesClass =
+          _selectedClassId == null || a.classId == _selectedClassId;
+      final matchesSection = _selectedSectionId == null ||
+          a.sectionId == null ||
+          a.sectionId!.isEmpty ||
+          a.sectionId == _selectedSectionId;
+      if (matchesClass && matchesSection && a.subjectId.isNotEmpty) {
+        if (!subjectsMap.containsKey(a.subjectId)) {
+          String sName = a.subjectName.isNotEmpty ? a.subjectName : '';
+          if (sName.isEmpty) {
+            try {
+              sName = allSubjects.firstWhere((s) => s.id == a.subjectId).name;
+            } catch (_) {
+              sName = 'Subject';
+            }
+          }
+          subjectsMap[a.subjectId] = _ResultSheetSubject(
+            id: a.subjectId,
+            name: sName,
+          );
+        }
+      }
+    }
+
+    for (var student in sortedStudents) {
+      final sResults = allResults.where((r) => matchesStudent(r, student));
+      for (var r in sResults) {
+        final sId = r.subjectId ?? r.subject?.id ?? '';
+        if (sId.isNotEmpty && !subjectsMap.containsKey(sId)) {
+          String sName = r.subject?.name ?? '';
+          if (sName.isEmpty) {
+            try {
+              sName = widget.exam.assignments
+                  .firstWhere((a) => a.subjectId == sId)
+                  .subjectName;
+            } catch (_) {}
+          }
+          if (sName.isEmpty) {
+            try {
+              sName = allSubjects.firstWhere((s) => s.id == sId).name;
+            } catch (_) {
+              sName = 'Subject';
+            }
+          }
+          subjectsMap[sId] = _ResultSheetSubject(
+            id: sId,
+            name: sName,
+            maxMarks: r.totalMarks > 0 ? r.totalMarks : 100.0,
+          );
+        }
+      }
+    }
+
+    final sheetSubjects = subjectsMap.values.toList();
+
+    // 4. Calculate student marks, totals, and ranks
+    final studentTotals = <String, double>{};
+    final studentMaxTotals = <String, double>{};
+    final studentSubjectResults = <String, Map<String, Result>>{};
+
+    for (var student in sortedStudents) {
+      double obtained = 0;
+      double maxPossible = 0;
+      final sMap = <String, Result>{};
+
+      final sResults =
+          allResults.where((r) => matchesStudent(r, student)).toList();
+      for (var r in sResults) {
+        final sId = r.subjectId ?? r.subject?.id ?? '';
+        if (sId.isNotEmpty) {
+          sMap[sId] = r;
+        }
+        obtained += r.marksObtained;
+        maxPossible += (r.totalMarks > 0 ? r.totalMarks : 100.0);
+      }
+
+      if (maxPossible == 0) {
+        maxPossible = sheetSubjects.fold(
+          0.0,
+          (sum, s) => sum + s.maxMarks,
+        );
+        if (maxPossible == 0) maxPossible = 100.0;
+      }
+
+      studentTotals[student.userId] = obtained;
+      studentMaxTotals[student.userId] = maxPossible;
+      studentSubjectResults[student.userId] = sMap;
+    }
+
+    // Rank by total marks descending
+    final sortedStudentIdsForRank = sortedStudents.map((s) => s.userId).toList()
+      ..sort((a, b) =>
+          (studentTotals[b] ?? 0).compareTo(studentTotals[a] ?? 0));
+
+    final studentRanks = <String, int>{};
+    int curRank = 1;
+    for (int i = 0; i < sortedStudentIdsForRank.length; i++) {
+      if (i > 0 &&
+          (studentTotals[sortedStudentIdsForRank[i]] ?? 0) <
+              (studentTotals[sortedStudentIdsForRank[i - 1]] ?? 0)) {
+        curRank = i + 1;
+      }
+      studentRanks[sortedStudentIdsForRank[i]] = curRank;
+    }
+
+    // 5. Pre-render all potential Bengali text
+    final allBengaliStrings = <String>{
+      schoolName,
+      schoolAddress,
+      widget.exam.name,
+      resolvedClassName,
+      resolvedSectionName,
+    };
+
+    for (var s in sheetSubjects) {
+      allBengaliStrings.add(s.name);
+    }
+
+    for (var student in sortedStudents) {
+      allBengaliStrings.add(student.user?.name ?? '');
+      allBengaliStrings.add(student.rollId);
+    }
+    allBengaliStrings.removeWhere((s) => s.trim().isEmpty);
+
+    final rendered = await BanglaTextRenderer.preRenderBatch(
+      allBengaliStrings,
+      fontSize: 8,
+      maxWidth: 300,
+    );
+
+    // Pre-render white text for table header subjects if Bengali
+    final headerSubjectRendered = <String, Uint8List?>{};
+    for (var s in sheetSubjects) {
+      if (BanglaTextRenderer.hasBengali(s.name)) {
+        headerSubjectRendered[s.name] =
+            await BanglaTextRenderer.renderToImageBytes(
+          s.name,
+          fontSize: 7.5,
+          bold: true,
+          color: Colors.white,
+          maxWidth: 160,
+        );
+      }
+    }
+
+    // 6. Calculate statistics
+    int passedCount = 0;
+    int failedCount = 0;
+    double highestTotal = 0;
+    double sumAllTotals = 0;
+
+    for (var student in sortedStudents) {
+      final total = studentTotals[student.userId] ?? 0;
+      final max = studentMaxTotals[student.userId] ?? 100;
+      final pct = max > 0 ? (total / max) * 100 : 0.0;
+      final grade = _calculateGrade(pct);
+
+      if (total > highestTotal) highestTotal = total;
+      sumAllTotals += total;
+
+      final sResults = studentSubjectResults[student.userId] ?? {};
+      bool hasSubjectFail = false;
+      for (var r in sResults.values) {
+        final subPct =
+            r.totalMarks > 0 ? (r.marksObtained / r.totalMarks) * 100 : 0.0;
+        if (subPct < 33.0) {
+          hasSubjectFail = true;
+          break;
+        }
+      }
+
+      if (grade != 'F' && !hasSubjectFail && sResults.isNotEmpty) {
+        passedCount++;
+      } else {
+        failedCount++;
+      }
+    }
+
+    final double classAvgTotal = sortedStudents.isNotEmpty
+        ? sumAllTotals / sortedStudents.length
+        : 0.0;
+    final double passRate = sortedStudents.isNotEmpty
+        ? (passedCount / sortedStudents.length) * 100
+        : 0.0;
+
+    // Subject averages
+    final subjectAverages = <String, double>{};
+    for (var s in sheetSubjects) {
+      double sumSub = 0;
+      int countSub = 0;
+      for (var student in sortedStudents) {
+        final r = studentSubjectResults[student.userId]?[s.id];
+        if (r != null) {
+          sumSub += r.marksObtained;
+          countSub++;
+        }
+      }
+      subjectAverages[s.id] = countSub > 0 ? (sumSub / countSub) : 0.0;
+    }
+
+    // 7. Add MultiPage document
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: format,
+        margin: const pw.EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        header: (pw.Context pwContext) {
+          return _buildResultSheetHeader(
+            schoolName: schoolName,
+            schoolAddress: schoolAddress,
+            schoolPhone: schoolPhone,
+            schoolEmail: schoolEmail,
+            schoolLogo: schoolLogo,
+            examName: widget.exam.name,
+            className: resolvedClassName,
+            sectionName: resolvedSectionName,
+            totalStudents: sortedStudents.length,
+            rendered: rendered,
+            pageNumber: pwContext.pageNumber,
+            totalPages: pwContext.pagesCount,
+          );
+        },
+        footer: (pw.Context pwContext) {
+          return pw.Container(
+            margin: const pw.EdgeInsets.only(top: 8),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text(
+                  'Generated by Smart School - ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+                  style: const pw.TextStyle(
+                    fontSize: 7,
+                    color: PdfColors.grey600,
+                  ),
+                ),
+                pw.Text(
+                  'Page ${pwContext.pageNumber} of ${pwContext.pagesCount}',
+                  style: pw.TextStyle(
+                    fontSize: 7,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.grey700,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+        build: (pw.Context pwContext) {
+          return [
+            _buildTabulationTable(
+              sortedStudents: sortedStudents,
+              sheetSubjects: sheetSubjects,
+              studentTotals: studentTotals,
+              studentMaxTotals: studentMaxTotals,
+              studentRanks: studentRanks,
+              studentSubjectResults: studentSubjectResults,
+              subjectAverages: subjectAverages,
+              classAvgTotal: classAvgTotal,
+              rendered: rendered,
+              headerSubjectRendered: headerSubjectRendered,
+            ),
+            pw.SizedBox(height: 12),
+            _buildClassStatisticsCard(
+              totalStudents: sortedStudents.length,
+              passedCount: passedCount,
+              failedCount: failedCount,
+              passRate: passRate,
+              highestTotal: highestTotal,
+              classAvgTotal: classAvgTotal,
+            ),
+            pw.SizedBox(height: 24),
+            _buildResultSheetSignatures(),
+          ];
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  pw.Widget _buildResultSheetHeader({
+    required String schoolName,
+    required String schoolAddress,
+    required String schoolPhone,
+    required String schoolEmail,
+    required pw.ImageProvider? schoolLogo,
+    required String examName,
+    required String className,
+    required String sectionName,
+    required int totalStudents,
+    required Map<String, Uint8List?> rendered,
+    required int pageNumber,
+    required int totalPages,
+  }) {
+    final primaryColor = PdfColor.fromHex('#1E1B4B');
+    final accentColor = PdfColor.fromHex('#4338CA');
+    final borderTint = PdfColor.fromHex('#E2E8F0');
+    final bgTint = PdfColor.fromHex('#F8FAFC');
+
+    if (pageNumber > 1) {
+      return pw.Container(
+        margin: const pw.EdgeInsets.only(bottom: 8),
+        padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: pw.BoxDecoration(
+          color: bgTint,
+          border: pw.Border.all(color: borderTint, width: 0.8),
+          borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+        ),
+        child: pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Row(
+              children: [
+                BanglaTextRenderer.fromBytes(
+                  rendered[schoolName],
+                  schoolName.toUpperCase(),
+                  fontSize: 9.5,
+                  bold: true,
+                  color: primaryColor,
+                ),
+                pw.Text('  |  ',
+                    style: const pw.TextStyle(
+                        fontSize: 9, color: PdfColors.grey500)),
+                pw.Text(
+                  '$examName - TABULATION SHEET (Contd.)',
+                  style: pw.TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: pw.FontWeight.bold,
+                    color: accentColor,
+                  ),
+                ),
+              ],
+            ),
+            pw.Text(
+              'Class: $className | Section: $sectionName',
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return pw.Container(
+      margin: const pw.EdgeInsets.only(bottom: 10),
+      child: pw.Column(
+        children: [
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              if (schoolLogo != null)
+                pw.Container(
+                  height: 48,
+                  width: 48,
+                  margin: const pw.EdgeInsets.only(right: 12),
+                  child: pw.Image(schoolLogo),
+                )
+              else
+                pw.Container(
+                  height: 42,
+                  width: 42,
+                  margin: const pw.EdgeInsets.only(right: 12),
+                  decoration: pw.BoxDecoration(
+                    color: primaryColor,
+                    shape: pw.BoxShape.circle,
+                  ),
+                  child: pw.Center(
+                    child: pw.Text(
+                      schoolName.isNotEmpty ? schoolName[0].toUpperCase() : 'S',
+                      style: pw.TextStyle(
+                        color: PdfColors.white,
+                        fontSize: 18,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    BanglaTextRenderer.fromBytes(
+                      rendered[schoolName],
+                      schoolName.toUpperCase(),
+                      fontSize: 15,
+                      bold: true,
+                      color: primaryColor,
+                    ),
+                    pw.SizedBox(height: 2),
+                    if (schoolAddress.isNotEmpty)
+                      BanglaTextRenderer.fromBytes(
+                        rendered[schoolAddress],
+                        schoolAddress,
+                        fontSize: 7.5,
+                        color: PdfColors.grey700,
+                      ),
+                    if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
+                      pw.Text(
+                        [
+                          if (schoolPhone.isNotEmpty) 'Phone: $schoolPhone',
+                          if (schoolEmail.isNotEmpty) 'Email: $schoolEmail',
+                        ].join(' | '),
+                        style: const pw.TextStyle(
+                          fontSize: 7.5,
+                          color: PdfColors.grey600,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              pw.Container(
+                padding:
+                    const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: pw.BoxDecoration(
+                  color: bgTint,
+                  border: pw.Border.all(color: borderTint),
+                  borderRadius:
+                      const pw.BorderRadius.all(pw.Radius.circular(6)),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    pw.Text(
+                      'CLASS RESULT SHEET',
+                      style: pw.TextStyle(
+                        fontSize: 8.5,
+                        fontWeight: pw.FontWeight.bold,
+                        color: primaryColor,
+                      ),
+                    ),
+                    pw.Text(
+                      'TABULATION MARKSHEET',
+                      style: const pw.TextStyle(
+                        fontSize: 6.5,
+                        color: PdfColors.grey600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 8),
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: pw.BoxDecoration(
+              color: bgTint,
+              border: pw.Border.all(color: borderTint),
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+            ),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'EXAM: ',
+                      style: pw.TextStyle(
+                        color: PdfColors.grey700,
+                        fontSize: 8,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    BanglaTextRenderer.fromBytes(
+                      rendered[examName],
+                      examName,
+                      fontSize: 8,
+                      bold: true,
+                      color: primaryColor,
+                    ),
+                  ],
+                ),
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'CLASS: ',
+                      style: pw.TextStyle(
+                        color: PdfColors.grey700,
+                        fontSize: 8,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    BanglaTextRenderer.fromBytes(
+                      rendered[className],
+                      className,
+                      fontSize: 8,
+                      bold: true,
+                      color: primaryColor,
+                    ),
+                  ],
+                ),
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'SECTION: ',
+                      style: pw.TextStyle(
+                        color: PdfColors.grey700,
+                        fontSize: 8,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    BanglaTextRenderer.fromBytes(
+                      rendered[sectionName],
+                      sectionName,
+                      fontSize: 8,
+                      bold: true,
+                      color: primaryColor,
+                    ),
+                  ],
+                ),
+                pw.Text(
+                  'TOTAL STUDENTS: $totalStudents',
+                  style: pw.TextStyle(
+                    color: primaryColor,
+                    fontSize: 8,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildTabulationTable({
+    required List<Student> sortedStudents,
+    required List<_ResultSheetSubject> sheetSubjects,
+    required Map<String, double> studentTotals,
+    required Map<String, double> studentMaxTotals,
+    required Map<String, int> studentRanks,
+    required Map<String, Map<String, Result>> studentSubjectResults,
+    required Map<String, double> subjectAverages,
+    required double classAvgTotal,
+    required Map<String, Uint8List?> rendered,
+    required Map<String, Uint8List?> headerSubjectRendered,
+  }) {
+    final primaryColor = PdfColor.fromHex('#1E1B4B');
+    final borderColor = PdfColor.fromHex('#CBD5E1');
+
+    final columnWidths = <int, pw.TableColumnWidth>{
+      0: const pw.FixedColumnWidth(34), // Roll
+      1: const pw.FlexColumnWidth(2.6), // Name
+    };
+    int colIdx = 2;
+    for (int i = 0; i < sheetSubjects.length; i++) {
+      columnWidths[colIdx++] = const pw.FlexColumnWidth(1.2);
+    }
+    columnWidths[colIdx++] = const pw.FixedColumnWidth(44); // Total
+    columnWidths[colIdx++] = const pw.FixedColumnWidth(38); // %
+    columnWidths[colIdx++] = const pw.FixedColumnWidth(32); // Grade
+    columnWidths[colIdx++] = const pw.FixedColumnWidth(32); // Rank
+    columnWidths[colIdx++] = const pw.FixedColumnWidth(42); // Status
+
+    return pw.Table(
+      border: pw.TableBorder.all(color: borderColor, width: 0.5),
+      columnWidths: columnWidths,
+      children: [
+        // ── Header Row ────────────────────────────────────────────────────────
+        pw.TableRow(
+          repeat: true,
+          decoration: pw.BoxDecoration(color: primaryColor),
+          children: [
+            _buildTableHeaderCell('ROLL'),
+            _buildTableHeaderCell('STUDENT NAME', align: pw.TextAlign.left),
+            ...sheetSubjects.map((s) {
+              return pw.Container(
+                padding:
+                    const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+                child: pw.Column(
+                  mainAxisSize: pw.MainAxisSize.min,
+                  children: [
+                    BanglaTextRenderer.fromBytes(
+                      headerSubjectRendered[s.name],
+                      s.name,
+                      fontSize: 7.5,
+                      bold: true,
+                      color: PdfColors.white,
+                      textAlign: pw.TextAlign.center,
+                    ),
+                    pw.SizedBox(height: 1),
+                    pw.Text(
+                      '(${s.maxMarks.toStringAsFixed(0)})',
+                      style: pw.TextStyle(
+                        fontSize: 6,
+                        color: PdfColor.fromHex('#CBD5E1'),
+                      ),
+                      textAlign: pw.TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            }),
+            _buildTableHeaderCell('TOTAL'),
+            _buildTableHeaderCell('%'),
+            _buildTableHeaderCell('GRADE'),
+            _buildTableHeaderCell('RANK'),
+            _buildTableHeaderCell('STATUS'),
+          ],
+        ),
+
+        // ── Student Rows ──────────────────────────────────────────────────────
+        ...sortedStudents.asMap().entries.map((entry) {
+          final idx = entry.key;
+          final student = entry.value;
+          final bg = idx.isEven ? PdfColors.white : PdfColor.fromHex('#F8FAFC');
+
+          final total = studentTotals[student.userId] ?? 0;
+          final max = studentMaxTotals[student.userId] ?? 100;
+          final pct = max > 0 ? (total / max) * 100 : 0.0;
+          final grade = _calculateGrade(pct);
+          final rank = studentRanks[student.userId] ?? 0;
+
+          final sResults = studentSubjectResults[student.userId] ?? {};
+          bool hasSubjectFail = false;
+          for (var r in sResults.values) {
+            final subPct = r.totalMarks > 0
+                ? (r.marksObtained / r.totalMarks) * 100
+                : 0.0;
+            if (subPct < 33.0) {
+              hasSubjectFail = true;
+              break;
+            }
+          }
+
+          final isAbsent = sResults.isEmpty;
+          final isPassed = grade != 'F' && !hasSubjectFail && !isAbsent;
+          final statusText = isAbsent ? 'ABSENT' : (isPassed ? 'PASS' : 'FAIL');
+          final statusColor = isAbsent
+              ? PdfColors.grey600
+              : (isPassed
+                  ? PdfColor.fromHex('#15803D')
+                  : PdfColor.fromHex('#DC2626'));
+
+          return pw.TableRow(
+            decoration: pw.BoxDecoration(color: bg),
+            children: [
+              // Roll
+              pw.Container(
+                padding:
+                    const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 3.5),
+                alignment: pw.Alignment.center,
+                child: BanglaTextRenderer.fromBytes(
+                  rendered[student.rollId],
+                  student.rollId.isNotEmpty ? student.rollId : '-',
+                  fontSize: 7.5,
+                  bold: true,
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+
+              // Name
+              pw.Container(
+                padding:
+                    const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3.5),
+                alignment: pw.Alignment.centerLeft,
+                child: BanglaTextRenderer.fromBytes(
+                  rendered[student.user?.name ?? ''],
+                  student.user?.name ?? 'N/A',
+                  fontSize: 7.5,
+                  bold: true,
+                  textAlign: pw.TextAlign.left,
+                ),
+              ),
+
+              // Subject Columns
+              ...sheetSubjects.map((s) {
+                final r = sResults[s.id];
+                if (r == null) {
+                  return pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 2, vertical: 3.5),
+                    alignment: pw.Alignment.center,
+                    child: pw.Text(
+                      '-',
+                      style: const pw.TextStyle(
+                        fontSize: 7.5,
+                        color: PdfColors.grey500,
+                      ),
+                      textAlign: pw.TextAlign.center,
+                    ),
+                  );
+                }
+
+                final marks = r.marksObtained;
+                final marksStr = marks % 1 == 0
+                    ? marks.toInt().toString()
+                    : marks.toStringAsFixed(1);
+                final isFail =
+                    r.totalMarks > 0 && (marks / r.totalMarks) < 0.33;
+
+                return pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 2, vertical: 3.5),
+                  alignment: pw.Alignment.center,
+                  child: pw.Text(
+                    marksStr,
+                    style: pw.TextStyle(
+                      fontSize: 7.5,
+                      fontWeight:
+                          isFail ? pw.FontWeight.bold : pw.FontWeight.normal,
+                      color: isFail
+                          ? PdfColor.fromHex('#DC2626')
+                          : PdfColor.fromHex('#1E293B'),
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                );
+              }),
+
+              // Total
+              pw.Container(
+                padding:
+                    const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 3.5),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  total % 1 == 0
+                      ? total.toInt().toString()
+                      : total.toStringAsFixed(1),
+                  style: pw.TextStyle(
+                    fontSize: 7.5,
+                    fontWeight: pw.FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+
+              // Percentage
+              pw.Container(
+                padding:
+                    const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 3.5),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  '${pct.toStringAsFixed(1)}%',
+                  style: const pw.TextStyle(fontSize: 7.5),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+
+              // Grade
+              pw.Container(
+                padding:
+                    const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 3.5),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  grade,
+                  style: pw.TextStyle(
+                    fontSize: 7.5,
+                    fontWeight: pw.FontWeight.bold,
+                    color: grade == 'F'
+                        ? PdfColor.fromHex('#DC2626')
+                        : primaryColor,
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+
+              // Rank
+              pw.Container(
+                padding:
+                    const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 3.5),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  _getOrdinal(rank),
+                  style: pw.TextStyle(
+                    fontSize: 7.5,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColor.fromHex('#B45309'),
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+
+              // Status
+              pw.Container(
+                padding:
+                    const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 3.5),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  statusText,
+                  style: pw.TextStyle(
+                    fontSize: 7,
+                    fontWeight: pw.FontWeight.bold,
+                    color: statusColor,
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+            ],
+          );
+        }),
+
+        // ── Class Average Row ─────────────────────────────────────────────────
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: PdfColor.fromHex('#EEF2F6')),
+          children: [
+            pw.Container(
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+              alignment: pw.Alignment.center,
+              child: pw.Text(''),
+            ),
+            pw.Container(
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              alignment: pw.Alignment.centerLeft,
+              child: pw.Text(
+                'CLASS AVERAGE',
+                style: pw.TextStyle(
+                  fontSize: 7.5,
+                  fontWeight: pw.FontWeight.bold,
+                  color: primaryColor,
+                ),
+              ),
+            ),
+            ...sheetSubjects.map((s) {
+              final avg = subjectAverages[s.id] ?? 0.0;
+              return pw.Container(
+                padding:
+                    const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  avg > 0 ? avg.toStringAsFixed(1) : '-',
+                  style: pw.TextStyle(
+                    fontSize: 7.5,
+                    fontWeight: pw.FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
+              );
+            }),
+            // Total Average
+            pw.Container(
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+              alignment: pw.Alignment.center,
+              child: pw.Text(
+                classAvgTotal.toStringAsFixed(1),
+                style: pw.TextStyle(
+                  fontSize: 7.5,
+                  fontWeight: pw.FontWeight.bold,
+                  color: primaryColor,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
+            ),
+            // Perc Average
+            pw.Container(
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+              alignment: pw.Alignment.center,
+              child: pw.Text(
+                '-',
+                style:
+                    const pw.TextStyle(fontSize: 7.5, color: PdfColors.grey600),
+                textAlign: pw.TextAlign.center,
+              ),
+            ),
+            // Grade
+            pw.Container(
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+              alignment: pw.Alignment.center,
+              child: pw.Text('-',
+                  style: const pw.TextStyle(
+                      fontSize: 7.5, color: PdfColors.grey600)),
+            ),
+            // Rank
+            pw.Container(
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+              alignment: pw.Alignment.center,
+              child: pw.Text('-',
+                  style: const pw.TextStyle(
+                      fontSize: 7.5, color: PdfColors.grey600)),
+            ),
+            // Status
+            pw.Container(
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+              alignment: pw.Alignment.center,
+              child: pw.Text('-',
+                  style: const pw.TextStyle(
+                      fontSize: 7.5, color: PdfColors.grey600)),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _buildTableHeaderCell(
+    String title, {
+    pw.TextAlign align = pw.TextAlign.center,
+  }) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 3, vertical: 5),
+      alignment: align == pw.TextAlign.left
+          ? pw.Alignment.centerLeft
+          : pw.Alignment.center,
+      child: pw.Text(
+        title,
+        style: pw.TextStyle(
+          color: PdfColors.white,
+          fontWeight: pw.FontWeight.bold,
+          fontSize: 7.5,
+        ),
+        textAlign: align,
+      ),
+    );
+  }
+
+  pw.Widget _buildClassStatisticsCard({
+    required int totalStudents,
+    required int passedCount,
+    required int failedCount,
+    required double passRate,
+    required double highestTotal,
+    required double classAvgTotal,
+  }) {
+    final primaryColor = PdfColor.fromHex('#1E1B4B');
+    final borderColor = PdfColor.fromHex('#CBD5E1');
+
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: pw.BoxDecoration(
+        color: PdfColor.fromHex('#F8FAFC'),
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+        border: pw.Border.all(color: borderColor, width: 0.8),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem('TOTAL STUDENTS', '$totalStudents', primaryColor),
+          _buildStatDivider(),
+          _buildStatItem(
+            'PASSED',
+            '$passedCount (${passRate.toStringAsFixed(1)}%)',
+            PdfColor.fromHex('#15803D'),
+          ),
+          _buildStatDivider(),
+          _buildStatItem('FAILED', '$failedCount', PdfColor.fromHex('#DC2626')),
+          _buildStatDivider(),
+          _buildStatItem(
+            'HIGHEST SCORE',
+            highestTotal % 1 == 0
+                ? highestTotal.toInt().toString()
+                : highestTotal.toStringAsFixed(1),
+            PdfColor.fromHex('#B45309'),
+          ),
+          _buildStatDivider(),
+          _buildStatItem(
+            'CLASS AVERAGE',
+            classAvgTotal.toStringAsFixed(1),
+            primaryColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildStatItem(String label, String value, PdfColor valueColor) {
+    return pw.Column(
+      mainAxisSize: pw.MainAxisSize.min,
+      children: [
+        pw.Text(
+          label,
+          style: const pw.TextStyle(
+            fontSize: 6.5,
+            color: PdfColors.grey600,
+          ),
+        ),
+        pw.SizedBox(height: 2),
+        pw.Text(
+          value,
+          style: pw.TextStyle(
+            fontSize: 9.5,
+            fontWeight: pw.FontWeight.bold,
+            color: valueColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _buildStatDivider() {
+    return pw.Container(
+      width: 1,
+      height: 20,
+      color: PdfColor.fromHex('#CBD5E1'),
+    );
+  }
+
+  pw.Widget _buildResultSheetSignatures() {
+    final primaryColor = PdfColor.fromHex('#1E1B4B');
+
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 20),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          _buildSignatureColumn('Exam Controller / Prepared By', primaryColor),
+          _buildSignatureColumn('Class Teacher', primaryColor),
+          _buildSignatureColumn('Headmaster / Principal', primaryColor),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildSignatureColumn(String title, PdfColor titleColor) {
+    return pw.Column(
+      mainAxisSize: pw.MainAxisSize.min,
+      children: [
+        pw.Container(
+          width: 170,
+          decoration: const pw.BoxDecoration(
+            border: pw.Border(
+              top: pw.BorderSide(color: PdfColors.grey500, width: 0.8),
+            ),
+          ),
+          padding: const pw.EdgeInsets.only(top: 4),
+          child: pw.Column(
+            children: [
+              pw.Text(
+                title,
+                style: pw.TextStyle(
+                  fontSize: 8,
+                  fontWeight: pw.FontWeight.bold,
+                  color: titleColor,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
+              pw.SizedBox(height: 2),
+              pw.Text(
+                'Date: ........................',
+                style: const pw.TextStyle(
+                  fontSize: 6.5,
+                  color: PdfColors.grey600,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   pw.Widget _buildReportCardSinglePage({
