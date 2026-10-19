@@ -24,15 +24,33 @@ enum ReportCardViewMode {
 }
 
 class _ResultSheetSubject {
-  final String id;
-  final String name;
-  final double maxMarks;
+  final String columnKey;
+  final Set<String> ids;
+  final Set<String> names;
+  String displayName;
+  double maxMarks;
 
   _ResultSheetSubject({
-    required this.id,
-    required this.name,
+    required this.columnKey,
+    required Set<String> ids,
+    required this.displayName,
+    Set<String>? names,
     this.maxMarks = 100.0,
-  });
+  })  : ids = Set<String>.from(ids),
+        names = names != null ? Set<String>.from(names) : {displayName};
+
+  String get id => columnKey;
+  String get name => displayName;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _ResultSheetSubject &&
+          runtimeType == other.runtimeType &&
+          columnKey == other.columnKey;
+
+  @override
+  int get hashCode => columnKey.hashCode;
 }
 
 class GenerateReportCardScreen extends StatefulWidget {
@@ -567,6 +585,51 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     return pdf.save();
   }
 
+  String _normalizeColumnKey(String s) {
+    return s
+        .trim()
+        .toLowerCase()
+        .replaceAll('&', ' and ')
+        .replaceAll(RegExp(r'\s+'), ' ');
+  }
+
+  String _simplifyColumnKey(String s) {
+    return _normalizeColumnKey(s)
+        .replaceAll(RegExp(r'[^a-zA-Z0-9\u0980-\u09FF]'), '');
+  }
+
+  String _stripGenericSubjectTerms(String simplified) {
+    String s = simplified;
+    s = s.replaceAll(
+      RegExp(r'(paper|papers|subject|part|পত্র|বিষয়|বিভাগ)$'),
+      '',
+    );
+    s = s.replaceAll(RegExp(r'^(subject|বিষয়)'), '');
+    return s.trim();
+  }
+
+  bool _areSubjectNamesSimilar(String nameA, String nameB) {
+    if (nameA.trim().isEmpty || nameB.trim().isEmpty) return false;
+    final normA = _normalizeColumnKey(nameA);
+    final normB = _normalizeColumnKey(nameB);
+    if (normA == normB) return true;
+
+    final simpleA = _simplifyColumnKey(nameA);
+    final simpleB = _simplifyColumnKey(nameB);
+    if (simpleA.isNotEmpty && simpleA == simpleB) return true;
+
+    final coreA = _stripGenericSubjectTerms(simpleA);
+    final coreB = _stripGenericSubjectTerms(simpleB);
+    if (coreA.isNotEmpty && coreA == coreB) return true;
+
+    if ((simpleA == 'math' && simpleB == 'mathematics') ||
+        (simpleA == 'mathematics' && simpleB == 'math')) {
+      return true;
+    }
+
+    return false;
+  }
+
   Future<Uint8List> _generateClassResultSheetPdf(
     PdfPageFormat format,
     School? school,
@@ -676,8 +739,57 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       resolvedSectionName = sortedStudents.first.sectionName!;
     }
 
-    // 3. Determine unique subjects for this class and exam
-    final subjectsMap = <String, _ResultSheetSubject>{};
+    // 3. Determine unique subjects for this class and exam (deduplicating similar column names)
+    final sheetSubjects = <_ResultSheetSubject>[];
+
+    void addOrMergeSubject({
+      required String subjectId,
+      required String subjectName,
+      double maxMarks = 100.0,
+    }) {
+      final sId = subjectId.trim();
+      final sName = subjectName.trim();
+      if (sId.isEmpty && sName.isEmpty) return;
+
+      _ResultSheetSubject? existing;
+      for (final s in sheetSubjects) {
+        if (sId.isNotEmpty && s.ids.contains(sId)) {
+          existing = s;
+          break;
+        }
+        if (sName.isNotEmpty &&
+            (_areSubjectNamesSimilar(s.displayName, sName) ||
+                s.names.any((n) => _areSubjectNamesSimilar(n, sName)))) {
+          existing = s;
+          break;
+        }
+      }
+
+      if (existing != null) {
+        if (sId.isNotEmpty) existing.ids.add(sId);
+        if (sName.isNotEmpty) existing.names.add(sName);
+        if (maxMarks > 0 &&
+            (existing.maxMarks <= 0 || maxMarks > existing.maxMarks)) {
+          existing.maxMarks = maxMarks;
+        }
+        if ((existing.displayName.isEmpty || existing.displayName == 'Subject') &&
+            sName.isNotEmpty &&
+            sName != 'Subject') {
+          existing.displayName = sName;
+        }
+      } else {
+        final key = sId.isNotEmpty ? sId : 'sub_${sheetSubjects.length}';
+        sheetSubjects.add(
+          _ResultSheetSubject(
+            columnKey: key,
+            ids: sId.isNotEmpty ? {sId} : {},
+            displayName: sName.isNotEmpty ? sName : 'Subject',
+            names: sName.isNotEmpty ? {sName} : {},
+            maxMarks: maxMarks > 0 ? maxMarks : 100.0,
+          ),
+        );
+      }
+    }
 
     for (var a in widget.exam.assignments) {
       final matchesClass =
@@ -687,53 +799,85 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
           a.sectionId!.isEmpty ||
           a.sectionId == _selectedSectionId;
       if (matchesClass && matchesSection && a.subjectId.isNotEmpty) {
-        if (!subjectsMap.containsKey(a.subjectId)) {
-          String sName = a.subjectName.isNotEmpty ? a.subjectName : '';
-          if (sName.isEmpty) {
-            try {
-              sName = allSubjects.firstWhere((s) => s.id == a.subjectId).name;
-            } catch (_) {
-              sName = 'Subject';
-            }
+        String sName = a.subjectName.isNotEmpty ? a.subjectName : '';
+        try {
+          final matched = allSubjects.firstWhere((s) => s.id == a.subjectId);
+          if (matched.name.isNotEmpty) {
+            sName = matched.name;
           }
-          subjectsMap[a.subjectId] = _ResultSheetSubject(
-            id: a.subjectId,
-            name: sName,
-          );
-        }
+        } catch (_) {}
+
+        addOrMergeSubject(
+          subjectId: a.subjectId,
+          subjectName: sName,
+          maxMarks: 100.0,
+        );
       }
     }
 
     for (var student in sortedStudents) {
       final sResults = allResults.where((r) => matchesStudent(r, student));
       for (var r in sResults) {
-        final sId = r.subjectId ?? r.subject?.id ?? '';
-        if (sId.isNotEmpty && !subjectsMap.containsKey(sId)) {
-          String sName = r.subject?.name ?? '';
-          if (sName.isEmpty) {
-            try {
-              sName = widget.exam.assignments
-                  .firstWhere((a) => a.subjectId == sId)
-                  .subjectName;
-            } catch (_) {}
-          }
-          if (sName.isEmpty) {
-            try {
-              sName = allSubjects.firstWhere((s) => s.id == sId).name;
-            } catch (_) {
-              sName = 'Subject';
+        final sId = (r.subjectId ?? r.subject?.id ?? '').trim();
+        String sName = (r.subject?.name ?? '').trim();
+        if (sId.isNotEmpty) {
+          try {
+            final matched = allSubjects.firstWhere((s) => s.id == sId);
+            if (matched.name.isNotEmpty) {
+              sName = matched.name;
             }
-          }
-          subjectsMap[sId] = _ResultSheetSubject(
-            id: sId,
-            name: sName,
-            maxMarks: r.totalMarks > 0 ? r.totalMarks : 100.0,
-          );
+          } catch (_) {}
         }
+        if (sName.isEmpty && sId.isNotEmpty) {
+          try {
+            sName = widget.exam.assignments
+                .firstWhere((a) => a.subjectId == sId)
+                .subjectName;
+          } catch (_) {}
+        }
+
+        addOrMergeSubject(
+          subjectId: sId,
+          subjectName: sName,
+          maxMarks: r.totalMarks > 0 ? r.totalMarks : 100.0,
+        );
       }
     }
 
-    final sheetSubjects = subjectsMap.values.toList();
+    _ResultSheetSubject? findSubjectFor(Result r) {
+      final sId = (r.subjectId ?? r.subject?.id ?? '').trim();
+      final sName = (r.subject?.name ?? '').trim();
+
+      if (sId.isNotEmpty) {
+        for (final s in sheetSubjects) {
+          if (s.ids.contains(sId)) return s;
+        }
+      }
+
+      String resolvedName = sName;
+      if (resolvedName.isEmpty && sId.isNotEmpty) {
+        try {
+          resolvedName = allSubjects.firstWhere((sub) => sub.id == sId).name;
+        } catch (_) {
+          try {
+            resolvedName = widget.exam.assignments
+                .firstWhere((a) => a.subjectId == sId)
+                .subjectName;
+          } catch (_) {}
+        }
+      }
+
+      if (resolvedName.isNotEmpty) {
+        for (final s in sheetSubjects) {
+          if (_areSubjectNamesSimilar(s.displayName, resolvedName) ||
+              s.names.any((n) => _areSubjectNamesSimilar(n, resolvedName))) {
+            return s;
+          }
+        }
+      }
+
+      return null;
+    }
 
     // 4. Calculate student marks, totals, and ranks
     final studentTotals = <String, double>{};
@@ -741,17 +885,23 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     final studentSubjectResults = <String, Map<String, Result>>{};
 
     for (var student in sortedStudents) {
-      double obtained = 0;
-      double maxPossible = 0;
       final sMap = <String, Result>{};
-
       final sResults =
           allResults.where((r) => matchesStudent(r, student)).toList();
+
       for (var r in sResults) {
-        final sId = r.subjectId ?? r.subject?.id ?? '';
-        if (sId.isNotEmpty) {
-          sMap[sId] = r;
+        final matchedSubject = findSubjectFor(r);
+        if (matchedSubject != null) {
+          final existing = sMap[matchedSubject.id];
+          if (existing == null || r.marksObtained > existing.marksObtained) {
+            sMap[matchedSubject.id] = r;
+          }
         }
+      }
+
+      double obtained = 0;
+      double maxPossible = 0;
+      for (var r in sMap.values) {
         obtained += r.marksObtained;
         maxPossible += (r.totalMarks > 0 ? r.totalMarks : 100.0);
       }
@@ -796,6 +946,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
 
     for (var s in sheetSubjects) {
       allBengaliStrings.add(s.name);
+      allBengaliStrings.addAll(s.names);
     }
 
     for (var student in sortedStudents) {
@@ -902,28 +1053,35 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
           );
         },
         footer: (pw.Context pwContext) {
-          return pw.Container(
-            margin: const pw.EdgeInsets.only(top: 8),
-            child: pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text(
-                  'Generated by Smart School - ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-                  style: const pw.TextStyle(
-                    fontSize: 7,
-                    color: PdfColors.grey600,
-                  ),
+          return pw.Column(
+            mainAxisSize: pw.MainAxisSize.min,
+            children: [
+              _buildResultSheetSignatures(),
+              pw.SizedBox(height: 6),
+              pw.Container(
+                margin: const pw.EdgeInsets.only(top: 2),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      'Generated by Smart School - ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+                      style: const pw.TextStyle(
+                        fontSize: 7,
+                        color: PdfColors.grey600,
+                      ),
+                    ),
+                    pw.Text(
+                      'Page ${pwContext.pageNumber} of ${pwContext.pagesCount}',
+                      style: pw.TextStyle(
+                        fontSize: 7,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
+                  ],
                 ),
-                pw.Text(
-                  'Page ${pwContext.pageNumber} of ${pwContext.pagesCount}',
-                  style: pw.TextStyle(
-                    fontSize: 7,
-                    fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.grey700,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         },
         build: (pw.Context pwContext) {
@@ -940,7 +1098,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
               rendered: rendered,
               headerSubjectRendered: headerSubjectRendered,
             ),
-            pw.SizedBox(height: 12),
+            pw.SizedBox(height: 10),
             _buildClassStatisticsCard(
               totalStudents: sortedStudents.length,
               passedCount: passedCount,
@@ -949,8 +1107,6 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
               highestTotal: highestTotal,
               classAvgTotal: classAvgTotal,
             ),
-            pw.SizedBox(height: 24),
-            _buildResultSheetSignatures(),
           ];
         },
       ),
@@ -1678,7 +1834,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     final primaryColor = PdfColor.fromHex('#1E1B4B');
 
     return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(horizontal: 20),
+      padding: const pw.EdgeInsets.only(top: 14, left: 16, right: 16),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
