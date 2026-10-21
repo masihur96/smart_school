@@ -119,104 +119,105 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
           // Filter Bar
           if (_showFilter)
             Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              // color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String?>(
-                        decoration: _inputDeco(
-                          AppLocalizations.of(context)!.className,
-                        ),
-                        initialValue: _selectedClass,
-                        items: [
-                          DropdownMenuItem(
-                            value: null,
-                            child: Text(l10n.allClasses),
-                          ),
-                          ...classes.map(
-                            (c) => DropdownMenuItem(
-                              value: c.id,
-                              child: Text(c.name),
-                            ),
-                          ),
-                        ],
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedClass = val;
-                            _selectedSection = null;
-                            _selectedSubject = null;
-                          });
-                          _onFetchHomework();
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: DropdownButtonFormField<String?>(
-                        decoration: _inputDeco('Section'),
-                        initialValue: _selectedSection,
-                        items: [
-                          DropdownMenuItem(
-                            value: null,
-                            child: Text(l10n.allSections),
-                          ),
-                          ...context
-                              .read<SectionSetupNotifier>()
-                              .sections
-                              .where((s) => s.classId == _selectedClass)
-                              .map(
-                                (s) => DropdownMenuItem(
-                                  value: s.id,
-                                  child: Text(s.name),
-                                ),
-                              ),
-                        ],
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedSection = val;
-                          });
-                          _onFetchHomework();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String?>(
-                  decoration: _inputDeco(
-                    AppLocalizations.of(context)!.subjectName,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                // color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
                   ),
-                  initialValue: _selectedSubject,
-                  isExpanded: true,
-                  items: [
-                    DropdownMenuItem(
-                      value: null,
-                      child: Text(l10n.allSubjects),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String?>(
+                          decoration: _inputDeco(
+                            AppLocalizations.of(context)!.className,
+                          ),
+                          initialValue: _selectedClass,
+                          items: [
+                            DropdownMenuItem(
+                              value: null,
+                              child: Text(l10n.allClasses),
+                            ),
+                            ...classes.map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text(c.name),
+                              ),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedClass = val;
+                              _selectedSection = null;
+                              _selectedSubject = null;
+                            });
+                            _onFetchHomework();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: DropdownButtonFormField<String?>(
+                          decoration: _inputDeco('Section'),
+                          initialValue: _selectedSection,
+                          items: [
+                            DropdownMenuItem(
+                              value: null,
+                              child: Text(l10n.allSections),
+                            ),
+                            ...context
+                                .read<SectionSetupNotifier>()
+                                .sections
+                                .where((s) => s.classId == _selectedClass)
+                                .map(
+                                  (s) => DropdownMenuItem(
+                                    value: s.id,
+                                    child: Text(s.name),
+                                  ),
+                                ),
+                          ],
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedSection = val;
+                            });
+                            _onFetchHomework();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String?>(
+                    decoration: _inputDeco(
+                      AppLocalizations.of(context)!.subjectName,
                     ),
-                    ...filteredSubjects.map(
-                      (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
-                    ),
-                  ],
-                  onChanged: (val) {
-                    setState(() => _selectedSubject = val);
-                    _onFetchHomework();
-                  },
-                ),
-              ],
+                    initialValue: _selectedSubject,
+                    isExpanded: true,
+                    items: [
+                      DropdownMenuItem(
+                        value: null,
+                        child: Text(l10n.allSubjects),
+                      ),
+                      ...filteredSubjects.map(
+                        (s) =>
+                            DropdownMenuItem(value: s.id, child: Text(s.name)),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      setState(() => _selectedSubject = val);
+                      _onFetchHomework();
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
           if (_isLoading)
             Expanded(child: _buildShimmerLoading())
           else
@@ -759,7 +760,9 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedClassId == null || _selectedSubjectId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseSelectClassSubject)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.pleaseSelectClassSubject),
+        ),
       );
       return;
     }
@@ -810,7 +813,9 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.failedToSaveHomework)),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.failedToSaveHomework),
+            ),
           );
         }
       }
