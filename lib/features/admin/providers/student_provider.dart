@@ -11,6 +11,26 @@ import '../../../core/constants/api_path.dart';
 import '../../../models/student_model.dart';
 import '../../../services/database_service.dart';
 
+/// Extracts a human-readable error message from an API response map.
+/// If the response contains an `errors` list of `{field, message}` objects,
+/// their messages are joined and returned. Falls back to `message`, then a default.
+String _extractApiErrorMessage(dynamic data, String fallback) {
+  try {
+    if (data is Map) {
+      final errors = data['errors'];
+      if (errors is List && errors.isNotEmpty) {
+        return errors
+            .map((e) => e is Map ? e['message'] as String? ?? '' : '')
+            .where((m) => m.isNotEmpty)
+            .join(', ');
+      }
+      final msg = data['message'];
+      if (msg is String && msg.isNotEmpty) return msg;
+    }
+  } catch (_) {}
+  return fallback;
+}
+
 class StudentsNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
   List<Student> _students = [];
@@ -424,7 +444,7 @@ class StudentsNotifier extends ChangeNotifier {
       // E.g., addStudent(Student(...)) if needed
     } else {
       log('Error creating student: ${response?.data}');
-      throw Exception('Failed to create student: ${response?.data}');
+      throw Exception(_extractApiErrorMessage(response?.data, 'Failed to create student'));
     }
   }
 
@@ -562,7 +582,7 @@ class StudentsNotifier extends ChangeNotifier {
       }
     } else {
       log('Error updating student: ${response?.data}');
-      throw Exception('Failed to update student: ${response?.data}');
+      throw Exception(_extractApiErrorMessage(response?.data, 'Failed to update student'));
     }
   }
 

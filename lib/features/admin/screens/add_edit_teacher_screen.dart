@@ -388,11 +388,12 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
         }
       } catch (e) {
         if (mounted) {
+          final msg = e is Exception
+              ? e.toString().replaceFirst('Exception: ', '')
+              : e.toString();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                '${isEditing ? AppLocalizations.of(context)!.updateFailed : AppLocalizations.of(context)!.registrationFailed}: $e',
-              ),
+              content: Text(msg),
             ),
           );
         }

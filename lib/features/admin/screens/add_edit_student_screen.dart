@@ -340,11 +340,12 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
         if (mounted) Navigator.pop(context);
       } catch (e) {
         if (mounted) {
+          final msg = e is Exception
+              ? e.toString().replaceFirst('Exception: ', '')
+              : e.toString();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                AppLocalizations.of(context)!.errorLabel(e.toString()),
-              ),
+              content: Text(msg),
             ),
           );
         }

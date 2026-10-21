@@ -11,6 +11,26 @@ import '../../../core/utils/storage_service.dart';
 import '../../../models/teacher_model.dart';
 import '../../../services/database_service.dart';
 
+/// Extracts a human-readable error message from an API response map.
+/// If the response contains an `errors` list of `{field, message}` objects,
+/// their messages are joined and returned. Falls back to `message`, then a default.
+String _extractApiErrorMessage(dynamic data, String fallback) {
+  try {
+    if (data is Map) {
+      final errors = data['errors'];
+      if (errors is List && errors.isNotEmpty) {
+        return errors
+            .map((e) => e is Map ? e['message'] as String? ?? '' : '')
+            .where((m) => m.isNotEmpty)
+            .join(', ');
+      }
+      final msg = data['message'];
+      if (msg is String && msg.isNotEmpty) return msg;
+    }
+  } catch (_) {}
+  return fallback;
+}
+
 class TeachersNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
   List<Teacher> _teachers = [];
@@ -295,7 +315,7 @@ class TeachersNotifier extends ChangeNotifier {
         log('Successfully created teacher');
       } else {
         log('Error creating teacher: ${response?.data}');
-        throw Exception('Failed to create teacher: ${response?.data}');
+        throw Exception(_extractApiErrorMessage(response?.data, 'Failed to create teacher'));
       }
     } catch (e) {
       log('Error creating teacher: $e');
@@ -441,7 +461,7 @@ class TeachersNotifier extends ChangeNotifier {
         }
       } else {
         log('Error updating teacher: ${response?.data}');
-        throw Exception('Failed to update teacher: ${response?.data}');
+        throw Exception(_extractApiErrorMessage(response?.data, 'Failed to update teacher'));
       }
     } catch (e) {
       log('Error updating teacher: $e');
