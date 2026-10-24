@@ -19,8 +19,8 @@ import 'package:smart_school/features/expense_tracking/screens/expense_dashboard
 import 'package:smart_school/features/library/screens/library_dashboard_screen.dart';
 import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
-import 'package:smart_school/features/setting_management_screen.dart';
 import 'package:smart_school/features/request_box/screens/request_box_screen.dart';
+import 'package:smart_school/features/setting_management_screen.dart';
 import 'package:smart_school/features/student/screens/student_academic_calendar_screen.dart';
 import 'package:smart_school/features/student/screens/student_attendance_screen.dart';
 import 'package:smart_school/features/student/screens/student_homework_screen.dart';
@@ -76,7 +76,7 @@ class AppDrawer extends StatelessWidget {
                   imageUrl: user.school?.avatar.isNotEmpty == true
                       ? user.school!.avatar
                       : null,
-                  name: user.school?.name??"Super Admin",
+                  name: user.school?.name ?? "Super Admin",
                   heroTag:
                       'school-avatar-${user.school?.id ?? user.school?.name ?? 'school'}',
                   radius: 20,
@@ -257,7 +257,10 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.all_inbox_rounded, l10n.requestBox, () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const RequestBoxScreen()),
+          MaterialPageRoute(
+            builder: (_) =>
+                RequestBoxScreen(scaffoldColor: AppColors.primaryAdmin),
+          ),
         );
       }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
@@ -343,7 +346,10 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.all_inbox_rounded, l10n.requestBox, () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const RequestBoxScreen()),
+          MaterialPageRoute(
+            builder: (_) =>
+                const RequestBoxScreen(scaffoldColor: AppColors.primaryTeacher),
+          ),
         );
       }, context),
 
@@ -426,7 +432,10 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.all_inbox_rounded, l10n.requestBox, () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const RequestBoxScreen()),
+          MaterialPageRoute(
+            builder: (_) =>
+                const RequestBoxScreen(scaffoldColor: AppColors.primaryStudent),
+          ),
         );
       }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
@@ -458,12 +467,12 @@ class AppDrawer extends StatelessWidget {
         context,
       ),
       _buildDrawerItem(Icons.history_edu, l10n.globalAuditLogs, () {}, context),
-      _buildDrawerItem(Icons.all_inbox_rounded, l10n.requestBox, () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const RequestBoxScreen()),
-        );
-      }, context),
+      // _buildDrawerItem(Icons.all_inbox_rounded, l10n.requestBox, () {
+      //   Navigator.push(
+      //     context,
+      //     MaterialPageRoute(builder: (_) => const RequestBoxScreen()),
+      //   );
+      // }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,

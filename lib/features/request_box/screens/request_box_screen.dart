@@ -3,13 +3,15 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+
 import '../models/request_complaint_model.dart';
 import '../providers/request_complaint_provider.dart';
 import 'create_request_complaint_screen.dart';
 import 'request_detail_screen.dart';
 
 class RequestBoxScreen extends StatefulWidget {
-  const RequestBoxScreen({super.key});
+  final Color scaffoldColor;
+  const RequestBoxScreen({super.key, required this.scaffoldColor});
 
   @override
   State<RequestBoxScreen> createState() => _RequestBoxScreenState();
@@ -42,19 +44,9 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
     'REJECTED',
   ];
 
-  final List<String> _priorities = [
-    'ALL',
-    'LOW',
-    'MEDIUM',
-    'HIGH',
-    'URGENT',
-  ];
+  final List<String> _priorities = ['ALL', 'LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 
-  final List<String> _scopes = [
-    'ALL',
-    'received',
-    'sent',
-  ];
+  final List<String> _scopes = ['ALL', 'received', 'sent'];
 
   @override
   void initState() {
@@ -82,9 +74,10 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
-      context
-          .read<RequestComplaintProvider>()
-          .fetchRequestComplaints(refresh: true, schoolId: schoolId);
+      context.read<RequestComplaintProvider>().fetchRequestComplaints(
+        refresh: true,
+        schoolId: schoolId,
+      );
     });
   }
 
@@ -101,9 +94,9 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
-      context
-          .read<RequestComplaintProvider>()
-          .fetchRequestComplaints(schoolId: schoolId);
+      context.read<RequestComplaintProvider>().fetchRequestComplaints(
+        schoolId: schoolId,
+      );
     }
   }
 
@@ -268,10 +261,14 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
                         ),
                         onPressed: () {
                           provider.setStatus(tempStatus, schoolId: schoolId);
-                          provider.setPriority(tempPriority,
-                              schoolId: schoolId);
-                          provider.setCategory(tempCategory,
-                              schoolId: schoolId);
+                          provider.setPriority(
+                            tempPriority,
+                            schoolId: schoolId,
+                          );
+                          provider.setCategory(
+                            tempCategory,
+                            schoolId: schoolId,
+                          );
                           provider.setScope(tempScope, schoolId: schoolId);
                           Navigator.pop(ctx);
                         },
@@ -304,6 +301,7 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: widget.scaffoldColor,
         title: const Text(
           'Request Box',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -379,10 +377,7 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
             ),
           );
           if (res == true && mounted) {
-            provider.fetchRequestComplaints(
-              refresh: true,
-              schoolId: schoolId,
-            );
+            provider.fetchRequestComplaints(refresh: true, schoolId: schoolId);
           }
         },
       ),
@@ -435,7 +430,10 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
               : null,
           filled: true,
           fillColor: isDark ? const Color(0xFF1E232E) : Colors.grey.shade100,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 10,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -452,7 +450,8 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
     RequestComplaintProvider provider,
     String schoolId,
   ) {
-    final hasFilters = provider.selectedStatus != 'ALL' ||
+    final hasFilters =
+        provider.selectedStatus != 'ALL' ||
         provider.selectedPriority != 'ALL' ||
         provider.selectedCategory != 'ALL' ||
         provider.selectedScope != 'ALL';
@@ -570,19 +569,13 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
               const SizedBox(height: 20),
               const Text(
                 'No Requests or Complaints Found',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'Create a request or complaint to get started.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
@@ -624,9 +617,7 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
         if (index == provider.items.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -641,10 +632,12 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
     bool isDark,
     RequestComplaintModel item,
   ) {
-    Color typeColor =
-        item.isRequest ? Colors.blue.shade700 : Colors.deepOrange.shade700;
-    Color typeBg =
-        item.isRequest ? Colors.blue.shade50 : Colors.deepOrange.shade50;
+    Color typeColor = item.isRequest
+        ? Colors.blue.shade700
+        : Colors.deepOrange.shade700;
+    Color typeBg = item.isRequest
+        ? Colors.blue.shade50
+        : Colors.deepOrange.shade50;
     if (isDark) typeBg = typeColor.withAlpha(45);
 
     Color statusColor;
@@ -658,18 +651,21 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
         break;
       case 'IN_PROGRESS':
         statusColor = Colors.blue.shade800;
-        statusBg =
-            isDark ? Colors.blue.shade900.withAlpha(50) : Colors.blue.shade50;
+        statusBg = isDark
+            ? Colors.blue.shade900.withAlpha(50)
+            : Colors.blue.shade50;
         break;
       case 'REJECTED':
         statusColor = Colors.red.shade800;
-        statusBg =
-            isDark ? Colors.red.shade900.withAlpha(50) : Colors.red.shade50;
+        statusBg = isDark
+            ? Colors.red.shade900.withAlpha(50)
+            : Colors.red.shade50;
         break;
       default:
         statusColor = Colors.orange.shade800;
-        statusBg =
-            isDark ? Colors.orange.shade900.withAlpha(50) : Colors.orange.shade50;
+        statusBg = isDark
+            ? Colors.orange.shade900.withAlpha(50)
+            : Colors.orange.shade50;
     }
 
     Color priorityColor;
@@ -692,9 +688,7 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: isDark ? Colors.white12 : Colors.grey.shade200,
-        ),
+        side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade200),
       ),
       color: isDark ? const Color(0xFF1E232E) : Colors.white,
       child: InkWell(
@@ -702,9 +696,7 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => RequestDetailScreen(item: item),
-            ),
+            MaterialPageRoute(builder: (_) => RequestDetailScreen(item: item)),
           );
         },
         child: Padding(
@@ -717,8 +709,10 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
                 children: [
                   // Type
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: typeBg,
                       borderRadius: BorderRadius.circular(6),
@@ -736,8 +730,10 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
 
                   // Priority
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: priorityColor.withAlpha(25),
                       borderRadius: BorderRadius.circular(6),
@@ -762,8 +758,10 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
 
                   // Status
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: statusBg,
                       borderRadius: BorderRadius.circular(6),
@@ -816,8 +814,10 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
                 children: [
                   // Category badge
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.primaryColor.withAlpha(20),
                       borderRadius: BorderRadius.circular(4),
