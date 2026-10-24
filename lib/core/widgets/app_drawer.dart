@@ -20,6 +20,7 @@ import 'package:smart_school/features/library/screens/library_dashboard_screen.d
 import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/features/setting_management_screen.dart';
+import 'package:smart_school/features/request_box/screens/request_box_screen.dart';
 import 'package:smart_school/features/student/screens/student_academic_calendar_screen.dart';
 import 'package:smart_school/features/student/screens/student_attendance_screen.dart';
 import 'package:smart_school/features/student/screens/student_homework_screen.dart';
@@ -253,6 +254,12 @@ class AppDrawer extends StatelessWidget {
           ),
         );
       }, context),
+      _buildDrawerItem(Icons.all_inbox_rounded, l10n.requestBox, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const RequestBoxScreen()),
+        );
+      }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,
@@ -333,6 +340,13 @@ class AppDrawer extends StatelessWidget {
         );
       }, context),
 
+      _buildDrawerItem(Icons.all_inbox_rounded, l10n.requestBox, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const RequestBoxScreen()),
+        );
+      }, context),
+
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,
@@ -409,6 +423,12 @@ class AppDrawer extends StatelessWidget {
           ),
         );
       }, context),
+      _buildDrawerItem(Icons.all_inbox_rounded, l10n.requestBox, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const RequestBoxScreen()),
+        );
+      }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,
@@ -438,6 +458,12 @@ class AppDrawer extends StatelessWidget {
         context,
       ),
       _buildDrawerItem(Icons.history_edu, l10n.globalAuditLogs, () {}, context),
+      _buildDrawerItem(Icons.all_inbox_rounded, l10n.requestBox, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const RequestBoxScreen()),
+        );
+      }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,

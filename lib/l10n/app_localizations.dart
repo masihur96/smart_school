@@ -7920,6 +7920,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No academic calendar events found'**
   String get noEventsFound;
+
+  /// No description provided for @requestBox.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Box'**
+  String get requestBox;
 }
 
 class _AppLocalizationsDelegate

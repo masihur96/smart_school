@@ -213,4 +213,8 @@ class APIPath {
   static String studentAcademicCalendar = "$baseUrl/student/academic-calendar";
   static String studentUpcomingAcademicCalendar =
       "$baseUrl/student/academic-calendar/upcoming";
+
+  // Request & Complaints (Request Box)
+  static String requestComplaints = "$baseUrl/request-complaints";
+  static String requestComplaint(String id) => "$baseUrl/request-complaints/$id";
 }

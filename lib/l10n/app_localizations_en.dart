@@ -4266,4 +4266,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noEventsFound => 'No academic calendar events found';
+
+  @override
+  String get requestBox => 'Request Box';
 }

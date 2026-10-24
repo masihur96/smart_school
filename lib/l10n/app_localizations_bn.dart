@@ -4279,4 +4279,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get noEventsFound => 'কোনো একাডেমিক ক্যালেন্ডার ইভেন্ট পাওয়া যায়নি';
+
+  @override
+  String get requestBox => 'রিকোয়েস্ট বক্স';
 }

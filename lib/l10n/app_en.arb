@@ -2060,5 +2060,6 @@
   "term": "Term",
   "location": "Location",
   "attachment": "Attachment",
-  "noEventsFound": "No academic calendar events found"
+  "noEventsFound": "No academic calendar events found",
+  "requestBox": "Request Box"
 }
