@@ -77,8 +77,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
         final file = File(result.files.first.path!);
         setState(() => _isUploadingAttachment = true);
 
-        final url =
-            await context.read<RequestComplaintProvider>().uploadAttachment(file);
+        final url = await context
+            .read<RequestComplaintProvider>()
+            .uploadAttachment(file);
 
         if (url != null && mounted) {
           setState(() {
@@ -120,8 +121,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
         final file = File(picked.path);
         setState(() => _isUploadingAttachment = true);
 
-        final url =
-            await context.read<RequestComplaintProvider>().uploadAttachment(file);
+        final url = await context
+            .read<RequestComplaintProvider>()
+            .uploadAttachment(file);
 
         if (url != null && mounted) {
           setState(() {
@@ -195,8 +197,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     String selectedStatus = _item.status;
-    final noteController =
-        TextEditingController(text: _item.resolutionNote ?? '');
+    final noteController = TextEditingController(
+      text: _item.resolutionNote ?? '',
+    );
 
     showModalBottomSheet(
       context: context,
@@ -240,8 +243,11 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                             color: AppColors.primary.withAlpha(25),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.sync_alt,
-                              color: AppColors.primary, size: 20),
+                          child: const Icon(
+                            Icons.sync_alt,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         const Text(
@@ -281,7 +287,8 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                           color: Colors.blue,
                           isSelected: selectedStatus == 'IN_PROGRESS',
                           onTap: () => setModalState(
-                              () => selectedStatus = 'IN_PROGRESS'),
+                            () => selectedStatus = 'IN_PROGRESS',
+                          ),
                         ),
                         _buildStatusOptionChip(
                           label: 'RESOLVED',
@@ -316,8 +323,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                       minLines: 3,
                       maxLines: 5,
                       decoration: InputDecoration(
-                        hintText:
-                            'e.g. Leave application approved for 3 days.',
+                        hintText: 'e.g. Leave application approved for 3 days.',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -350,15 +356,16 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                             onPressed: provider.isUpdatingStatus
                                 ? null
                                 : () async {
-                                    final messenger =
-                                        ScaffoldMessenger.of(context);
+                                    final messenger = ScaffoldMessenger.of(
+                                      context,
+                                    );
                                     final nav = Navigator.of(ctx);
 
                                     final updated = await provider.updateStatus(
                                       id: _item.id,
                                       status: selectedStatus,
-                                      resolutionNote:
-                                          noteController.text.trim(),
+                                      resolutionNote: noteController.text
+                                          .trim(),
                                     );
 
                                     if (!mounted) return;
@@ -377,7 +384,8 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                                         ),
                                       );
                                     } else {
-                                      final err = provider.errorMessage ??
+                                      final err =
+                                          provider.errorMessage ??
                                           'Failed to update status';
                                       messenger.showSnackBar(
                                         SnackBar(
@@ -428,9 +436,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
             Icon(Icons.delete_outline, color: Colors.red),
@@ -552,21 +558,12 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: _loadLatestDetails,
-          ),
-          IconButton(
-            icon: const Icon(Icons.sync_alt),
-            tooltip: 'Change Status',
-            onPressed: _showChangeStatusDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Delete',
-            onPressed: _confirmDelete,
-          ),
+          if (_item.senderId == currentUser!.id)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Delete',
+              onPressed: _confirmDelete,
+            ),
         ],
       ),
       body: Column(
@@ -694,8 +691,10 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
               children: [
                 // Type Badge
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: typeBg,
                     borderRadius: BorderRadius.circular(8),
@@ -714,8 +713,10 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
 
                 // Category Badge
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.primaryColor.withAlpha(20),
                     borderRadius: BorderRadius.circular(8),
@@ -733,8 +734,10 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
 
                 // Priority Badge
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: priorityColor.withAlpha(20),
                     borderRadius: BorderRadius.circular(8),
@@ -762,8 +765,10 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                   onTap: _showChangeStatusDialog,
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: statusBg,
                       borderRadius: BorderRadius.circular(8),
@@ -804,18 +809,13 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             Row(
               children: [
                 if (_item.createdAt != null) ...[
-                  Icon(
-                    Icons.schedule,
-                    size: 14,
-                    color: Colors.grey.shade500,
-                  ),
+                  Icon(Icons.schedule, size: 14, color: Colors.grey.shade500),
                   const SizedBox(width: 4),
                   Text(
-                    DateFormat('MMM dd, yyyy • hh:mm a').format(_item.createdAt!),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
+                    DateFormat(
+                      'MMM dd, yyyy • hh:mm a',
+                    ).format(_item.createdAt!),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                 ],
                 const Spacer(),
@@ -989,10 +989,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                     ].join(' • '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                   ),
                 ],
               ),
@@ -1018,11 +1015,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.notes,
-                  size: 18,
-                  color: theme.primaryColor,
-                ),
+                Icon(Icons.notes, size: 18, color: theme.primaryColor),
                 const SizedBox(width: 8),
                 const Text(
                   'Details & Description',
@@ -1074,8 +1067,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
-                  color:
-                      isRejected ? Colors.red.shade800 : Colors.green.shade800,
+                  color: isRejected
+                      ? Colors.red.shade800
+                      : Colors.green.shade800,
                 ),
               ),
             ],
@@ -1105,12 +1099,10 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                 const Spacer(),
                 if (_item.resolvedAt != null) ...[
                   Text(
-                    DateFormat('MMM dd, yyyy • hh:mm a')
-                        .format(_item.resolvedAt!),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey.shade600,
-                    ),
+                    DateFormat(
+                      'MMM dd, yyyy • hh:mm a',
+                    ).format(_item.resolvedAt!),
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                   ),
                 ],
               ],
@@ -1161,8 +1153,11 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                 color: theme.primaryColor.withAlpha(20),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Icon(Icons.forum_outlined,
-                  size: 16, color: theme.primaryColor),
+              child: Icon(
+                Icons.forum_outlined,
+                size: 16,
+                color: theme.primaryColor,
+              ),
             ),
             const SizedBox(width: 8),
             Text(
@@ -1202,10 +1197,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Use the comment bar below to reply to this thread.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade500,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                 ),
               ],
             ),
@@ -1225,11 +1217,12 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     ThemeData theme,
     String? currentUserId,
   ) {
-    final isMe = (currentUserId != null &&
+    final isMe =
+        (currentUserId != null &&
         (comment.senderId == currentUserId ||
             comment.sender?.id == currentUserId));
-    final senderName = comment.sender?.name ??
-        (isMe ? 'You' : (comment.senderId ?? 'User'));
+    final senderName =
+        comment.sender?.name ?? (isMe ? 'You' : (comment.senderId ?? 'User'));
     final senderRole = comment.sender?.role ?? 'Member';
     final senderAvatar = comment.sender?.avatar;
 
@@ -1237,8 +1230,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
           if (!isMe) ...[
             CircleAvatar(
@@ -1283,8 +1277,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                 ),
               ),
               child: Column(
-                crossAxisAlignment:
-                    isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                crossAxisAlignment: isMe
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
                 children: [
                   // Author & Time header
                   Row(
@@ -1300,7 +1295,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                       const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 5, vertical: 1),
+                          horizontal: 5,
+                          vertical: 1,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey.withAlpha(30),
                           borderRadius: BorderRadius.circular(4),
@@ -1423,8 +1420,11 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.attachment,
-                              size: 14, color: theme.primaryColor),
+                          Icon(
+                            Icons.attachment,
+                            size: 14,
+                            color: theme.primaryColor,
+                          ),
                           const SizedBox(width: 4),
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 120),
@@ -1509,7 +1509,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF28303F) : Colors.grey.shade100,
+                      color: isDark
+                          ? const Color(0xFF28303F)
+                          : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
@@ -1536,8 +1538,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                         color: Colors.grey.shade500,
                       ),
                       filled: true,
-                      fillColor:
-                          isDark ? const Color(0xFF28303F) : Colors.grey.shade100,
+                      fillColor: isDark
+                          ? const Color(0xFF28303F)
+                          : Colors.grey.shade100,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 14,
                         vertical: 10,
@@ -1567,11 +1570,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Icon(
-                            Icons.send,
-                            size: 18,
-                            color: Colors.white,
-                          ),
+                        : const Icon(Icons.send, size: 18, color: Colors.white),
                     onPressed: provider.isAddingComment ? null : _sendComment,
                   ),
                 ),
