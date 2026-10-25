@@ -34,7 +34,10 @@ class RequestComplaintProvider extends ChangeNotifier {
 
   // Potential recipients cache
   List<RequestComplaintUser> _potentialRecipients = [];
+  List<RequestComplaintUser> _recipientTeachers = [];
+  List<RequestComplaintUser> _recipientStudents = [];
   bool _isLoadingRecipients = false;
+  String? _currentRecipientsClassId;
 
   // Getters
   List<RequestComplaintModel> get items => _items;
@@ -55,7 +58,10 @@ class RequestComplaintProvider extends ChangeNotifier {
   String get selectedScope => _selectedScope;
   String get searchQuery => _searchQuery;
   List<RequestComplaintUser> get potentialRecipients => _potentialRecipients;
+  List<RequestComplaintUser> get recipientTeachers => _recipientTeachers;
+  List<RequestComplaintUser> get recipientStudents => _recipientStudents;
   bool get isLoadingRecipients => _isLoadingRecipients;
+  String? get currentRecipientsClassId => _currentRecipientsClassId;
 
   void setType(String type, {String? schoolId}) {
     if (_selectedType == type) return;
@@ -341,49 +347,113 @@ class RequestComplaintProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchPotentialRecipients({required String schoolId}) async {
-    if (_potentialRecipients.isNotEmpty) return;
+  Future<void> fetchPotentialRecipients({
+    String? classId,
+    String? schoolId,
+    bool force = false,
+  }) async {
+    if (!force &&
+        _potentialRecipients.isNotEmpty &&
+        _currentRecipientsClassId == classId) {
+      return;
+    }
     _isLoadingRecipients = true;
+    _currentRecipientsClassId = classId;
     notifyListeners();
 
     try {
       final token = await StorageService.getToken();
+      if (token == null) {
+        _isLoadingRecipients = false;
+        notifyListeners();
+        return;
+      }
+
+      final Map<String, dynamic> query = {};
+      if (classId != null && classId.isNotEmpty) {
+        query['classId'] = classId;
+      }
+
       final response = await _dataProvider.performRequest(
         'GET',
-        APIPath.fetchUsers,
-        query: {
-          'schoolId': schoolId,
-          'limit': '150',
-          'isActive': 'true',
-        },
+        APIPath.requestComplaintRecipients(),
+        query: query.isNotEmpty ? query : null,
         header: {
+          'accept': '*/*',
           'Authorization': 'Bearer $token',
         },
       );
 
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
-        final raw = response.data;
-        List<dynamic> usersData = [];
+        final dynamic raw = response.data;
+        List<RequestComplaintUser> teachersList = [];
+        List<RequestComplaintUser> studentsList = [];
+        List<RequestComplaintUser> otherList = [];
+
         if (raw is Map && raw['data'] != null) {
           final dataObj = raw['data'];
-          if (dataObj is Map && dataObj['data'] is List) {
-            usersData = dataObj['data'];
+          if (dataObj is Map) {
+            if (dataObj['teachers'] is List) {
+              teachersList = (dataObj['teachers'] as List)
+                  .map((t) {
+                    try {
+                      return RequestComplaintUser.fromJson(
+                          t as Map<String, dynamic>);
+                    } catch (e) {
+                      log('Error parsing teacher: $e');
+                      return null;
+                    }
+                  })
+                  .whereType<RequestComplaintUser>()
+                  .toList();
+            }
+            if (dataObj['students'] is List) {
+              studentsList = (dataObj['students'] as List)
+                  .map((s) {
+                    try {
+                      return RequestComplaintUser.fromJson(
+                          s as Map<String, dynamic>);
+                    } catch (e) {
+                      log('Error parsing student: $e');
+                      return null;
+                    }
+                  })
+                  .whereType<RequestComplaintUser>()
+                  .toList();
+            }
+            if (dataObj['admins'] is List) {
+              final admins = (dataObj['admins'] as List)
+                  .map((a) {
+                    try {
+                      return RequestComplaintUser.fromJson(
+                          a as Map<String, dynamic>);
+                    } catch (_) {
+                      return null;
+                    }
+                  })
+                  .whereType<RequestComplaintUser>()
+                  .toList();
+              otherList.addAll(admins);
+            }
           } else if (dataObj is List) {
-            usersData = dataObj;
+            otherList = dataObj
+                .map((u) {
+                  try {
+                    return RequestComplaintUser.fromJson(
+                        u as Map<String, dynamic>);
+                  } catch (_) {
+                    return null;
+                  }
+                })
+                .whereType<RequestComplaintUser>()
+                .toList();
           }
         }
 
-        _potentialRecipients = usersData
-            .map((u) {
-              try {
-                return RequestComplaintUser.fromJson(u as Map<String, dynamic>);
-              } catch (_) {
-                return null;
-              }
-            })
-            .whereType<RequestComplaintUser>()
-            .toList();
+        _recipientTeachers = teachersList;
+        _recipientStudents = studentsList;
+        _potentialRecipients = [...teachersList, ...studentsList, ...otherList];
       }
     } catch (e) {
       log('fetchPotentialRecipients error: $e');

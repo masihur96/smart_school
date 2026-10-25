@@ -3,12 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../models/request_complaint_model.dart';
 
 class RequestDetailScreen extends StatelessWidget {
+  final Color scaffoldColor;
   final RequestComplaintModel item;
 
-  const RequestDetailScreen({super.key, required this.item});
+  const RequestDetailScreen({
+    super.key,
+    required this.item,
+    required this.scaffoldColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +23,7 @@ class RequestDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: scaffoldColor,
         title: Text(
           item.isRequest ? 'Request Details' : 'Complaint Details',
           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -45,8 +52,10 @@ class RequestDetailScreen extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.primaryColor.withAlpha(25),
                     borderRadius: BorderRadius.circular(8),
@@ -69,7 +78,9 @@ class RequestDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    DateFormat('MMM dd, yyyy • hh:mm a').format(item.createdAt!),
+                    DateFormat(
+                      'MMM dd, yyyy • hh:mm a',
+                    ).format(item.createdAt!),
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
@@ -133,9 +144,7 @@ class RequestDetailScreen extends StatelessWidget {
                     const Divider(height: 24),
                     Text(
                       item.description,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        height: 1.5,
-                      ),
+                      style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                     ),
                   ],
                 ),
@@ -151,9 +160,7 @@ class RequestDetailScreen extends StatelessWidget {
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                    color: Colors.green.shade300,
-                  ),
+                  side: BorderSide(color: Colors.green.shade300),
                 ),
                 color: isDark
                     ? Colors.green.shade900.withAlpha(50)
@@ -221,13 +228,12 @@ class RequestDetailScreen extends StatelessWidget {
             if (item.attachments.isNotEmpty) ...[
               const Text(
                 'Attachments',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 12),
-              ...item.attachments.map((url) => _buildAttachmentItem(context, url, isDark)),
+              ...item.attachments.map(
+                (url) => _buildAttachmentItem(context, url, isDark),
+              ),
               const SizedBox(height: 24),
             ],
           ],
@@ -237,10 +243,12 @@ class RequestDetailScreen extends StatelessWidget {
   }
 
   Widget _buildBadgesHeader(bool isDark) {
-    Color typeColor =
-        item.isRequest ? Colors.blue.shade700 : Colors.deepOrange.shade700;
-    Color typeBg =
-        item.isRequest ? Colors.blue.shade50 : Colors.deepOrange.shade50;
+    Color typeColor = item.isRequest
+        ? Colors.blue.shade700
+        : Colors.deepOrange.shade700;
+    Color typeBg = item.isRequest
+        ? Colors.blue.shade50
+        : Colors.deepOrange.shade50;
     if (isDark) {
       typeBg = typeColor.withAlpha(50);
     }
@@ -265,19 +273,27 @@ class RequestDetailScreen extends StatelessWidget {
     switch (item.status) {
       case 'RESOLVED':
         statusColor = Colors.green.shade800;
-        statusBg = isDark ? Colors.green.shade900.withAlpha(60) : Colors.green.shade50;
+        statusBg = isDark
+            ? Colors.green.shade900.withAlpha(60)
+            : Colors.green.shade50;
         break;
       case 'IN_PROGRESS':
         statusColor = Colors.blue.shade800;
-        statusBg = isDark ? Colors.blue.shade900.withAlpha(60) : Colors.blue.shade50;
+        statusBg = isDark
+            ? Colors.blue.shade900.withAlpha(60)
+            : Colors.blue.shade50;
         break;
       case 'REJECTED':
         statusColor = Colors.red.shade800;
-        statusBg = isDark ? Colors.red.shade900.withAlpha(60) : Colors.red.shade50;
+        statusBg = isDark
+            ? Colors.red.shade900.withAlpha(60)
+            : Colors.red.shade50;
         break;
       default:
         statusColor = Colors.orange.shade800;
-        statusBg = isDark ? Colors.orange.shade900.withAlpha(60) : Colors.orange.shade50;
+        statusBg = isDark
+            ? Colors.orange.shade900.withAlpha(60)
+            : Colors.orange.shade50;
     }
 
     return Wrap(
@@ -358,7 +374,8 @@ class RequestDetailScreen extends StatelessWidget {
     required bool isDark,
   }) {
     final theme = Theme.of(context);
-    final name = user?.name ?? (targetRole != null ? 'Role: $targetRole' : 'N/A');
+    final name =
+        user?.name ?? (targetRole != null ? 'Role: $targetRole' : 'N/A');
     final role = user?.role ?? targetRole;
     final designation = user?.designation;
     final avatar = user?.avatar;
@@ -369,9 +386,7 @@ class RequestDetailScreen extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isDark ? Colors.white12 : Colors.grey.shade200,
-        ),
+        side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade200),
       ),
       color: isDark ? const Color(0xFF1E232E) : Colors.white,
       child: Padding(
@@ -413,8 +428,10 @@ class RequestDetailScreen extends StatelessWidget {
                   if (designation != null || role != null) ...[
                     const SizedBox(height: 2),
                     Text(
-                      [if (designation != null) designation, if (role != null) role.toUpperCase()]
-                          .join(' • '),
+                      [
+                        if (designation != null) designation,
+                        if (role != null) role.toUpperCase(),
+                      ].join(' • '),
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.textTheme.bodySmall?.color,
@@ -424,7 +441,10 @@ class RequestDetailScreen extends StatelessWidget {
                   if (email != null || phone != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      [if (phone != null) phone, if (email != null) email].join(' | '),
+                      [
+                        if (phone != null) phone,
+                        if (email != null) email,
+                      ].join(' | '),
                       style: TextStyle(
                         fontSize: 11,
                         color: theme.textTheme.bodySmall?.color,
@@ -440,9 +460,9 @@ class RequestDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAttachmentItem(
-      BuildContext context, String url, bool isDark) {
-    final isImage = url.toLowerCase().endsWith('.png') ||
+  Widget _buildAttachmentItem(BuildContext context, String url, bool isDark) {
+    final isImage =
+        url.toLowerCase().endsWith('.png') ||
         url.toLowerCase().endsWith('.jpg') ||
         url.toLowerCase().endsWith('.jpeg') ||
         url.toLowerCase().endsWith('.webp') ||
@@ -480,11 +500,8 @@ class RequestDetailScreen extends StatelessWidget {
                       width: 44,
                       height: 44,
                       fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => const Icon(
-                        Icons.image,
-                        size: 32,
-                        color: Colors.grey,
-                      ),
+                      errorWidget: (_, __, ___) =>
+                          const Icon(Icons.image, size: 32, color: Colors.grey),
                     ),
                   )
                 else
@@ -528,11 +545,7 @@ class RequestDetailScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(
-                  Icons.open_in_new,
-                  size: 18,
-                  color: Colors.grey,
-                ),
+                const Icon(Icons.open_in_new, size: 18, color: Colors.grey),
               ],
             ),
           ),

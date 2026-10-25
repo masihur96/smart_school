@@ -6,6 +6,8 @@ class RequestComplaintUser {
   final String? designation;
   final String? avatar;
   final String? phone;
+  final List<String> classIds;
+  final String? rollNumber;
 
   const RequestComplaintUser({
     required this.id,
@@ -15,9 +17,21 @@ class RequestComplaintUser {
     this.designation,
     this.avatar,
     this.phone,
+    this.classIds = const [],
+    this.rollNumber,
   });
 
   factory RequestComplaintUser.fromJson(Map<String, dynamic> json) {
+    List<String> parsedClassIds = [];
+    if (json['classIds'] is List) {
+      parsedClassIds = (json['classIds'] as List)
+          .map((e) => e?.toString() ?? '')
+          .where((e) => e.isNotEmpty)
+          .toList();
+    } else if (json['classId'] != null) {
+      parsedClassIds = [json['classId'].toString()];
+    }
+
     return RequestComplaintUser(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? 'Unknown User',
@@ -26,6 +40,8 @@ class RequestComplaintUser {
       designation: json['designation']?.toString(),
       avatar: json['avatar']?.toString(),
       phone: json['phone']?.toString(),
+      classIds: parsedClassIds,
+      rollNumber: json['rollNumber']?.toString(),
     );
   }
 
@@ -37,6 +53,8 @@ class RequestComplaintUser {
         'designation': designation,
         'avatar': avatar,
         'phone': phone,
+        'classIds': classIds,
+        'rollNumber': rollNumber,
       };
 }
 

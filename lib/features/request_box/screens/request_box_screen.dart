@@ -373,6 +373,7 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
                 initialType: _tabController.index == 2
                     ? 'COMPLAINT'
                     : 'REQUEST',
+                scaffoldColor: widget.scaffoldColor,
               ),
             ),
           );
@@ -592,7 +593,9 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
                   final res = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const CreateRequestComplaintScreen(),
+                      builder: (_) => CreateRequestComplaintScreen(
+                        scaffoldColor: widget.scaffoldColor,
+                      ),
                     ),
                   );
                   if (res == true && mounted) {
@@ -696,7 +699,12 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => RequestDetailScreen(item: item)),
+            MaterialPageRoute(
+              builder: (_) => RequestDetailScreen(
+                item: item,
+                scaffoldColor: widget.scaffoldColor,
+              ),
+            ),
           );
         },
         child: Padding(

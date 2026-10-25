@@ -217,4 +217,10 @@ class APIPath {
   // Request & Complaints (Request Box)
   static String requestComplaints = "$baseUrl/request-complaints";
   static String requestComplaint(String id) => "$baseUrl/request-complaints/$id";
+  static String requestComplaintRecipients({String? classId}) {
+    if (classId != null && classId.isNotEmpty) {
+      return "$baseUrl/request-complaints/recipients?classId=$classId";
+    }
+    return "$baseUrl/request-complaints/recipients";
+  }
 }
