@@ -696,8 +696,8 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
       color: isDark ? const Color(0xFF1E232E) : Colors.white,
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: () {
-          Navigator.push(
+        onTap: () async {
+          final res = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => RequestDetailScreen(
@@ -706,6 +706,13 @@ class _RequestBoxScreenState extends State<RequestBoxScreen>
               ),
             ),
           );
+          if (res == true && mounted) {
+            final user = context.read<AuthNotifier>().user;
+            context.read<RequestComplaintProvider>().fetchRequestComplaints(
+                  refresh: true,
+                  schoolId: user?.schoolId,
+                );
+          }
         },
         child: Padding(
           padding: const EdgeInsets.all(16),

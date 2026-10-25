@@ -18,6 +18,7 @@ class RequestComplaintProvider extends ChangeNotifier {
   bool _isUpdatingStatus = false;
   bool _isAddingComment = false;
   bool _isLoadingDetail = false;
+  bool _isDeleting = false;
   bool _isUploadingAttachment = false;
   String? _errorMessage;
 
@@ -50,6 +51,7 @@ class RequestComplaintProvider extends ChangeNotifier {
   bool get isUpdatingStatus => _isUpdatingStatus;
   bool get isAddingComment => _isAddingComment;
   bool get isLoadingDetail => _isLoadingDetail;
+  bool get isDeleting => _isDeleting;
   bool get isUploadingAttachment => _isUploadingAttachment;
   String? get errorMessage => _errorMessage;
   int get page => _page;
@@ -490,6 +492,62 @@ class RequestComplaintProvider extends ChangeNotifier {
       _isAddingComment = false;
       notifyListeners();
       return true;
+    }
+  }
+
+  Future<bool> deleteRequestComplaint(String id) async {
+    _isDeleting = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        _errorMessage = 'User not authenticated';
+        _isDeleting = false;
+        notifyListeners();
+        return false;
+      }
+
+      final response = await _dataProvider.performRequest(
+        'DELETE',
+        APIPath.requestComplaint(id),
+        header: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 ||
+              response.statusCode == 201 ||
+              response.statusCode == 204)) {
+        _items.removeWhere((item) => item.id == id);
+        _total = (_total - 1).clamp(0, double.infinity).toInt();
+        _isDeleting = false;
+        notifyListeners();
+        return true;
+      } else {
+        String msg = 'Failed to delete request/complaint';
+        if (response?.data is Map) {
+          final resMsg = response!.data['message'];
+          if (resMsg is List) {
+            msg = resMsg.join('\n');
+          } else if (resMsg != null) {
+            msg = resMsg.toString();
+          }
+        }
+        _errorMessage = msg;
+        _isDeleting = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      log('deleteRequestComplaint error: $e');
+      _errorMessage = 'An error occurred while deleting: $e';
+      _isDeleting = false;
+      notifyListeners();
+      return false;
     }
   }
 

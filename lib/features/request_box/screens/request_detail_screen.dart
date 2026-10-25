@@ -424,6 +424,75 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     );
   }
 
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.delete_outline, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Delete Entry', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to delete "${_item.title}"? This action cannot be undone.',
+          style: const TextStyle(height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final messenger = ScaffoldMessenger.of(context);
+      final nav = Navigator.of(context);
+      final provider = context.read<RequestComplaintProvider>();
+
+      final success = await provider.deleteRequestComplaint(_item.id);
+      if (!mounted) return;
+
+      if (success) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              '${_item.isRequest ? 'Request' : 'Complaint'} deleted successfully',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        nav.pop(true);
+      } else {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              provider.errorMessage ?? 'Failed to delete request/complaint',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildStatusOptionChip({
     required String label,
     required IconData icon,
@@ -492,6 +561,11 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             icon: const Icon(Icons.sync_alt),
             tooltip: 'Change Status',
             onPressed: _showChangeStatusDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Delete',
+            onPressed: _confirmDelete,
           ),
         ],
       ),
