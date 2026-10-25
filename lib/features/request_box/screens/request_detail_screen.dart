@@ -162,11 +162,14 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
       _pendingAttachments.clear();
     });
 
+    final currentUser = context.read<AuthNotifier>().user;
     final provider = context.read<RequestComplaintProvider>();
     final success = await provider.addComment(
       id: _item.id,
       message: text.isNotEmpty ? text : 'Shared an attachment',
       attachments: attachmentsToSend,
+      currentUserId: currentUser?.id,
+      senderName: currentUser?.name,
     );
 
     if (mounted) {
@@ -361,11 +364,15 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                                     );
                                     final nav = Navigator.of(ctx);
 
+                                    final currentUser =
+                                        context.read<AuthNotifier>().user;
                                     final updated = await provider.updateStatus(
                                       id: _item.id,
                                       status: selectedStatus,
                                       resolutionNote: noteController.text
                                           .trim(),
+                                      currentUserId: currentUser?.id,
+                                      updaterName: currentUser?.name,
                                     );
 
                                     if (!mounted) return;
@@ -607,7 +614,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                     ],
 
                     // Discussion Thread Section
-                    _buildDiscussionThread(isDark, theme, currentUser?.id),
+                    _buildDiscussionThread(isDark, theme, currentUser.id),
                     const SizedBox(height: 24),
                   ],
                 ),

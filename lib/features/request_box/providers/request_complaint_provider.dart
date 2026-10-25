@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+import 'package:smart_school/services/notification_service.dart';
 import '../models/request_complaint_model.dart';
 
 class RequestComplaintProvider extends ChangeNotifier {
@@ -243,6 +244,7 @@ class RequestComplaintProvider extends ChangeNotifier {
     String? recipientId,
     List<String> attachments = const [],
     String? schoolId,
+    String? senderName,
   }) async {
     _isSubmitting = true;
     _errorMessage = null;
@@ -286,6 +288,36 @@ class RequestComplaintProvider extends ChangeNotifier {
 
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
+        // Send notification to selected recipient / participant
+        if (recipientId != null && recipientId.isNotEmpty) {
+          try {
+            final fromText = senderName != null && senderName.isNotEmpty
+                ? ' from $senderName'
+                : '';
+            final preview = description.length > 100
+                ? '${description.substring(0, 100)}...'
+                : description;
+            final createdId = response.data is Map && response.data['data'] is Map
+                ? response.data['data']['id']?.toString()
+                : '';
+
+            await NotificationService().sendNotification(
+              receiverUuid: recipientId,
+              title: 'New $type$fromText',
+              message: '$title\n$preview',
+              additionalData: {
+                'type': 'request_complaint',
+                'id': createdId ?? '',
+                'action': 'create',
+                'requestType': type,
+              },
+            );
+            log('Notification sent to recipient $recipientId for new $type');
+          } catch (e) {
+            log('Error sending notification for new $type: $e');
+          }
+        }
+
         // Successfully created! Refresh list
         await fetchRequestComplaints(refresh: true, schoolId: schoolId);
         _isSubmitting = false;
@@ -319,6 +351,8 @@ class RequestComplaintProvider extends ChangeNotifier {
     required String id,
     required String status,
     String? resolutionNote,
+    String? currentUserId,
+    String? updaterName,
   }) async {
     _isUpdatingStatus = true;
     _errorMessage = null;
@@ -368,6 +402,51 @@ class RequestComplaintProvider extends ChangeNotifier {
         final idx = _items.indexWhere((i) => i.id == id);
         if (idx != -1 && updatedItem != null) {
           _items[idx] = updatedItem;
+        }
+
+        // Send Notification to selected participants
+        try {
+          final targetItem = updatedItem ?? (idx != -1 ? _items[idx] : null);
+          if (targetItem != null) {
+            final participants = <String>{};
+            if (targetItem.senderId != null &&
+                targetItem.senderId!.isNotEmpty) {
+              participants.add(targetItem.senderId!);
+            }
+            if (targetItem.recipientId != null &&
+                targetItem.recipientId!.isNotEmpty) {
+              participants.add(targetItem.recipientId!);
+            }
+            if (currentUserId != null && currentUserId.isNotEmpty) {
+              participants.remove(currentUserId);
+            }
+
+            final byText = updaterName != null && updaterName.isNotEmpty
+                ? ' by $updaterName'
+                : '';
+            final noteText =
+                (resolutionNote != null && resolutionNote.trim().isNotEmpty)
+                    ? '\nNote: ${resolutionNote.trim()}'
+                    : '';
+
+            for (final pId in participants) {
+              await NotificationService().sendNotification(
+                receiverUuid: pId,
+                title: '${targetItem.type} Status: $status',
+                message:
+                    'Status for "${targetItem.title}" has been updated to $status$byText.$noteText',
+                additionalData: {
+                  'type': 'request_complaint',
+                  'id': id,
+                  'status': status,
+                  'action': 'status_update',
+                },
+              );
+              log('Status update notification sent to participant $pId');
+            }
+          }
+        } catch (e) {
+          log('Error sending status update notification: $e');
         }
 
         _isUpdatingStatus = false;
@@ -449,6 +528,8 @@ class RequestComplaintProvider extends ChangeNotifier {
     required String id,
     required String message,
     List<String> attachments = const [],
+    String? currentUserId,
+    String? senderName,
   }) async {
     _isAddingComment = true;
     _errorMessage = null;
@@ -480,7 +561,47 @@ class RequestComplaintProvider extends ChangeNotifier {
       );
 
       // Re-fetch detail to refresh comments thread with populated author/sender
-      await fetchRequestComplaintDetail(id);
+      final updatedItem = await fetchRequestComplaintDetail(id);
+
+      // Send notification to other participant(s)
+      try {
+        if (updatedItem != null) {
+          final participants = <String>{};
+          if (updatedItem.senderId != null &&
+              updatedItem.senderId!.isNotEmpty) {
+            participants.add(updatedItem.senderId!);
+          }
+          if (updatedItem.recipientId != null &&
+              updatedItem.recipientId!.isNotEmpty) {
+            participants.add(updatedItem.recipientId!);
+          }
+          if (currentUserId != null && currentUserId.isNotEmpty) {
+            participants.remove(currentUserId);
+          }
+
+          final fromText = senderName != null && senderName.isNotEmpty
+              ? ' from $senderName'
+              : '';
+          final preview = message.length > 100
+              ? '${message.substring(0, 100)}...'
+              : message;
+
+          for (final pId in participants) {
+            await NotificationService().sendNotification(
+              receiverUuid: pId,
+              title: 'New Reply$fromText on "${updatedItem.title}"',
+              message: preview,
+              additionalData: {
+                'type': 'request_complaint',
+                'id': id,
+                'action': 'new_comment',
+              },
+            );
+          }
+        }
+      } catch (e) {
+        log('Error sending comment notification: $e');
+      }
 
       _isAddingComment = false;
       notifyListeners();

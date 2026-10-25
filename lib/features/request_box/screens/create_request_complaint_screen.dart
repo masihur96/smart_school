@@ -653,6 +653,7 @@ class _CreateRequestComplaintScreenState
       recipientId: _recipientId,
       attachments: _attachments,
       schoolId: schoolId,
+      senderName: user?.name,
     );
 
     if (!mounted) return;
