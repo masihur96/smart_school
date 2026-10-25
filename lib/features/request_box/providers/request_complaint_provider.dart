@@ -16,6 +16,8 @@ class RequestComplaintProvider extends ChangeNotifier {
   bool _isLoadingMore = false;
   bool _isSubmitting = false;
   bool _isUpdatingStatus = false;
+  bool _isAddingComment = false;
+  bool _isLoadingDetail = false;
   bool _isUploadingAttachment = false;
   String? _errorMessage;
 
@@ -46,6 +48,8 @@ class RequestComplaintProvider extends ChangeNotifier {
   bool get isLoadingMore => _isLoadingMore;
   bool get isSubmitting => _isSubmitting;
   bool get isUpdatingStatus => _isUpdatingStatus;
+  bool get isAddingComment => _isAddingComment;
+  bool get isLoadingDetail => _isLoadingDetail;
   bool get isUploadingAttachment => _isUploadingAttachment;
   String? get errorMessage => _errorMessage;
   int get page => _page;
@@ -388,6 +392,104 @@ class RequestComplaintProvider extends ChangeNotifier {
       _isUpdatingStatus = false;
       notifyListeners();
       return null;
+    }
+  }
+
+  Future<RequestComplaintModel?> fetchRequestComplaintDetail(String id) async {
+    _isLoadingDetail = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        _isLoadingDetail = false;
+        notifyListeners();
+        return null;
+      }
+
+      final response = await _dataProvider.performRequest(
+        'GET',
+        APIPath.requestComplaint(id),
+        header: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        if (response.data is Map && response.data['data'] != null) {
+          final item = RequestComplaintModel.fromJson(
+            response.data['data'] as Map<String, dynamic>,
+          );
+
+          // Update in memory items list
+          final idx = _items.indexWhere((i) => i.id == id);
+          if (idx != -1) {
+            _items[idx] = item;
+          }
+
+          _isLoadingDetail = false;
+          notifyListeners();
+          return item;
+        }
+      }
+    } catch (e) {
+      log('fetchRequestComplaintDetail error: $e');
+    } finally {
+      _isLoadingDetail = false;
+      notifyListeners();
+    }
+    return null;
+  }
+
+  Future<bool> addComment({
+    required String id,
+    required String message,
+    List<String> attachments = const [],
+  }) async {
+    _isAddingComment = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        _errorMessage = 'User not authenticated';
+        _isAddingComment = false;
+        notifyListeners();
+        return false;
+      }
+
+      final Map<String, dynamic> body = {
+        'message': message.trim(),
+        'attachments': attachments,
+      };
+
+      await _dataProvider.performRequest(
+        'POST',
+        APIPath.requestComplaintComments(id),
+        data: body,
+        header: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      // Re-fetch detail to refresh comments thread with populated author/sender
+      await fetchRequestComplaintDetail(id);
+
+      _isAddingComment = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      log('addComment error: $e');
+      // Still attempt to re-fetch in case database insertion succeeded
+      await fetchRequestComplaintDetail(id);
+      _isAddingComment = false;
+      notifyListeners();
+      return true;
     }
   }
 

@@ -58,6 +58,66 @@ class RequestComplaintUser {
       };
 }
 
+class RequestComplaintComment {
+  final String id;
+  final String? requestComplaintId;
+  final String? senderId;
+  final String message;
+  final List<String> attachments;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final RequestComplaintUser? sender;
+
+  const RequestComplaintComment({
+    required this.id,
+    this.requestComplaintId,
+    this.senderId,
+    required this.message,
+    this.attachments = const [],
+    this.createdAt,
+    this.updatedAt,
+    this.sender,
+  });
+
+  factory RequestComplaintComment.fromJson(Map<String, dynamic> json) {
+    List<String> parsedAttachments = [];
+    if (json['attachments'] is List) {
+      parsedAttachments = (json['attachments'] as List)
+          .map((e) => e?.toString() ?? '')
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+
+    return RequestComplaintComment(
+      id: json['id']?.toString() ?? '',
+      requestComplaintId: json['requestComplaintId']?.toString(),
+      senderId: json['senderId']?.toString(),
+      message: json['message']?.toString() ?? '',
+      attachments: parsedAttachments,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
+          : null,
+      sender: json['sender'] is Map<String, dynamic>
+          ? RequestComplaintUser.fromJson(json['sender'])
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'requestComplaintId': requestComplaintId,
+        'senderId': senderId,
+        'message': message,
+        'attachments': attachments,
+        'createdAt': createdAt?.toIso8601String(),
+        'updatedAt': updatedAt?.toIso8601String(),
+        if (sender != null) 'sender': sender!.toJson(),
+      };
+}
+
 class RequestComplaintModel {
   final String id;
   final String? schoolId;
@@ -79,6 +139,7 @@ class RequestComplaintModel {
   final RequestComplaintUser? sender;
   final RequestComplaintUser? recipient;
   final RequestComplaintUser? resolvedBy;
+  final List<RequestComplaintComment> comments;
 
   const RequestComplaintModel({
     required this.id,
@@ -101,10 +162,43 @@ class RequestComplaintModel {
     this.sender,
     this.recipient,
     this.resolvedBy,
+    this.comments = const [],
   });
 
   bool get isRequest => type.toUpperCase() == 'REQUEST';
   bool get isComplaint => type.toUpperCase() == 'COMPLAINT';
+
+  RequestComplaintModel copyWith({
+    String? status,
+    String? resolutionNote,
+    String? resolvedById,
+    DateTime? resolvedAt,
+    List<RequestComplaintComment>? comments,
+  }) {
+    return RequestComplaintModel(
+      id: id,
+      schoolId: schoolId,
+      senderId: senderId,
+      recipientId: recipientId,
+      targetRole: targetRole,
+      type: type,
+      category: category,
+      title: title,
+      description: description,
+      priority: priority,
+      status: status ?? this.status,
+      attachments: attachments,
+      resolutionNote: resolutionNote ?? this.resolutionNote,
+      resolvedById: resolvedById ?? this.resolvedById,
+      resolvedAt: resolvedAt ?? this.resolvedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      sender: sender,
+      recipient: recipient,
+      resolvedBy: resolvedBy,
+      comments: comments ?? this.comments,
+    );
+  }
 
   factory RequestComplaintModel.fromJson(Map<String, dynamic> json) {
     List<String> parsedAttachments = [];
@@ -112,6 +206,21 @@ class RequestComplaintModel {
       parsedAttachments = (json['attachments'] as List)
           .map((e) => e?.toString() ?? '')
           .where((e) => e.isNotEmpty)
+          .toList();
+    }
+
+    List<RequestComplaintComment> parsedComments = [];
+    if (json['comments'] is List) {
+      parsedComments = (json['comments'] as List)
+          .map((c) {
+            try {
+              return RequestComplaintComment.fromJson(
+                  c as Map<String, dynamic>);
+            } catch (_) {
+              return null;
+            }
+          })
+          .whereType<RequestComplaintComment>()
           .toList();
     }
 
@@ -148,6 +257,7 @@ class RequestComplaintModel {
       resolvedBy: json['resolvedBy'] is Map<String, dynamic>
           ? RequestComplaintUser.fromJson(json['resolvedBy'])
           : null,
+      comments: parsedComments,
     );
   }
 
@@ -172,5 +282,6 @@ class RequestComplaintModel {
         if (sender != null) 'sender': sender!.toJson(),
         if (recipient != null) 'recipient': recipient!.toJson(),
         if (resolvedBy != null) 'resolvedBy': resolvedBy!.toJson(),
+        'comments': comments.map((c) => c.toJson()).toList(),
       };
 }
