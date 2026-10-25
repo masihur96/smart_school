@@ -15,6 +15,7 @@ class RequestComplaintProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _isSubmitting = false;
+  bool _isUpdatingStatus = false;
   bool _isUploadingAttachment = false;
   String? _errorMessage;
 
@@ -44,6 +45,7 @@ class RequestComplaintProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
   bool get isSubmitting => _isSubmitting;
+  bool get isUpdatingStatus => _isUpdatingStatus;
   bool get isUploadingAttachment => _isUploadingAttachment;
   String? get errorMessage => _errorMessage;
   int get page => _page;
@@ -304,6 +306,88 @@ class RequestComplaintProvider extends ChangeNotifier {
       _isSubmitting = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<RequestComplaintModel?> updateStatus({
+    required String id,
+    required String status,
+    String? resolutionNote,
+  }) async {
+    _isUpdatingStatus = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        _errorMessage = 'User not authenticated';
+        _isUpdatingStatus = false;
+        notifyListeners();
+        return null;
+      }
+
+      final Map<String, dynamic> body = {
+        'status': status,
+      };
+      if (resolutionNote != null && resolutionNote.trim().isNotEmpty) {
+        body['resolutionNote'] = resolutionNote.trim();
+      }
+
+      final response = await _dataProvider.performRequest(
+        'PATCH',
+        APIPath.updateRequestComplaintStatus(id),
+        data: body,
+        header: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        RequestComplaintModel? updatedItem;
+        if (response.data is Map && response.data['data'] != null) {
+          try {
+            updatedItem = RequestComplaintModel.fromJson(
+              response.data['data'] as Map<String, dynamic>,
+            );
+          } catch (e) {
+            log('Error parsing updated item: $e');
+          }
+        }
+
+        // Update in current list if present
+        final idx = _items.indexWhere((i) => i.id == id);
+        if (idx != -1 && updatedItem != null) {
+          _items[idx] = updatedItem;
+        }
+
+        _isUpdatingStatus = false;
+        notifyListeners();
+        return updatedItem;
+      } else {
+        String msg = 'Failed to update status';
+        if (response?.data is Map) {
+          final resMsg = response!.data['message'];
+          if (resMsg is List) {
+            msg = resMsg.join('\n');
+          } else if (resMsg != null) {
+            msg = resMsg.toString();
+          }
+        }
+        _errorMessage = msg;
+        _isUpdatingStatus = false;
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      log('updateStatus error: $e');
+      _errorMessage = 'An error occurred while updating status: $e';
+      _isUpdatingStatus = false;
+      notifyListeners();
+      return null;
     }
   }
 

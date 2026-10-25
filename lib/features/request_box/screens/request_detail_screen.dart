@@ -1,12 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/request_complaint_model.dart';
+import '../providers/request_complaint_provider.dart';
 
-class RequestDetailScreen extends StatelessWidget {
+class RequestDetailScreen extends StatefulWidget {
   final Color scaffoldColor;
   final RequestComplaintModel item;
 
@@ -17,18 +19,328 @@ class RequestDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<RequestDetailScreen> createState() => _RequestDetailScreenState();
+}
+
+class _RequestDetailScreenState extends State<RequestDetailScreen> {
+  late RequestComplaintModel _item;
+
+  @override
+  void initState() {
+    super.initState();
+    _item = widget.item;
+  }
+
+  void _showChangeStatusDialog() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    String selectedStatus = _item.status;
+    final noteController =
+        TextEditingController(text: _item.resolutionNote ?? '');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final provider = context.watch<RequestComplaintProvider>();
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 16,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade400,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Row(
+                      children: [
+                        Icon(Icons.sync_alt, color: AppColors.primary),
+                        SizedBox(width: 8),
+                        Text(
+                          'Update Status',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Select New Status *',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildStatusOptionChip(
+                          label: 'PENDING',
+                          icon: Icons.hourglass_empty,
+                          color: Colors.orange,
+                          isSelected: selectedStatus == 'PENDING',
+                          onTap: () =>
+                              setModalState(() => selectedStatus = 'PENDING'),
+                        ),
+                        _buildStatusOptionChip(
+                          label: 'IN_PROGRESS',
+                          icon: Icons.run_circle_outlined,
+                          color: Colors.blue,
+                          isSelected: selectedStatus == 'IN_PROGRESS',
+                          onTap: () => setModalState(
+                              () => selectedStatus = 'IN_PROGRESS'),
+                        ),
+                        _buildStatusOptionChip(
+                          label: 'RESOLVED',
+                          icon: Icons.check_circle_outline,
+                          color: Colors.green,
+                          isSelected: selectedStatus == 'RESOLVED',
+                          onTap: () =>
+                              setModalState(() => selectedStatus = 'RESOLVED'),
+                        ),
+                        _buildStatusOptionChip(
+                          label: 'REJECTED',
+                          icon: Icons.cancel_outlined,
+                          color: Colors.red,
+                          isSelected: selectedStatus == 'REJECTED',
+                          onTap: () =>
+                              setModalState(() => selectedStatus = 'REJECTED'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Resolution Note / Remarks',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: noteController,
+                      minLines: 3,
+                      maxLines: 5,
+                      decoration: InputDecoration(
+                        hintText:
+                            'e.g. Leave application approved for 3 days.',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        filled: true,
+                        fillColor: isDark
+                            ? const Color(0xFF1E232E)
+                            : Colors.grey.shade100,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: provider.isUpdatingStatus
+                                ? null
+                                : () => Navigator.pop(ctx),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: provider.isUpdatingStatus
+                                ? null
+                                : () async {
+                                    final messenger =
+                                        ScaffoldMessenger.of(context);
+                                    final nav = Navigator.of(ctx);
+
+                                    final updated = await provider.updateStatus(
+                                      id: _item.id,
+                                      status: selectedStatus,
+                                      resolutionNote:
+                                          noteController.text.trim(),
+                                    );
+
+                                    if (!mounted) return;
+
+                                    if (updated != null) {
+                                      setState(() {
+                                        _item = updated;
+                                      });
+                                      nav.pop();
+                                      messenger.showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Status updated to $selectedStatus successfully!',
+                                          ),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+                                    } else {
+                                      final err = provider.errorMessage ??
+                                          'Failed to update status';
+                                      messenger.showSnackBar(
+                                        SnackBar(
+                                          content: Text(err),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: provider.isUpdatingStatus
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Update Status',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildStatusOptionChip({
+    required String label,
+    required IconData icon,
+    required MaterialColor color,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withAlpha(40) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? color.shade700 : Colors.grey.shade400,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? color.shade700 : Colors.grey.shade700,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                color: isSelected ? color.shade900 : Colors.grey.shade800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: scaffoldColor,
+        backgroundColor: widget.scaffoldColor,
         title: Text(
-          item.isRequest ? 'Request Details' : 'Complaint Details',
+          _item.isRequest ? 'Request Details' : 'Complaint Details',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.sync_alt),
+            tooltip: 'Change Status',
+            onPressed: _showChangeStatusDialog,
+          ),
+        ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: ElevatedButton.icon(
+            onPressed: _showChangeStatusDialog,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 2,
+            ),
+            icon: const Icon(Icons.sync_alt, size: 20),
+            label: const Text(
+              'Change Status',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -41,7 +353,7 @@ class RequestDetailScreen extends StatelessWidget {
 
             // Title
             Text(
-              item.title,
+              _item.title,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -61,7 +373,7 @@ class RequestDetailScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    item.category,
+                    _item.category,
                     style: TextStyle(
                       color: theme.primaryColor,
                       fontWeight: FontWeight.w600,
@@ -70,7 +382,7 @@ class RequestDetailScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                if (item.createdAt != null) ...[
+                if (_item.createdAt != null) ...[
                   Icon(
                     Icons.access_time,
                     size: 14,
@@ -80,7 +392,7 @@ class RequestDetailScreen extends StatelessWidget {
                   Text(
                     DateFormat(
                       'MMM dd, yyyy • hh:mm a',
-                    ).format(item.createdAt!),
+                    ).format(_item.createdAt!),
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
@@ -92,8 +404,8 @@ class RequestDetailScreen extends StatelessWidget {
             _buildPartyCard(
               context: context,
               title: 'Sender (From)',
-              user: item.sender,
-              fallbackId: item.senderId,
+              user: _item.sender,
+              fallbackId: _item.senderId,
               icon: Icons.person_outline,
               isDark: isDark,
             ),
@@ -101,9 +413,9 @@ class RequestDetailScreen extends StatelessWidget {
             _buildPartyCard(
               context: context,
               title: 'Recipient (To)',
-              user: item.recipient,
-              fallbackId: item.recipientId,
-              targetRole: item.targetRole,
+              user: _item.recipient,
+              fallbackId: _item.recipientId,
+              targetRole: _item.targetRole,
               icon: Icons.assignment_ind_outlined,
               isDark: isDark,
             ),
@@ -143,7 +455,7 @@ class RequestDetailScreen extends StatelessWidget {
                     ),
                     const Divider(height: 24),
                     Text(
-                      item.description,
+                      _item.description,
                       style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                     ),
                   ],
@@ -153,53 +465,70 @@ class RequestDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Resolution info if available
-            if (item.status == 'RESOLVED' ||
-                item.resolutionNote != null ||
-                item.resolvedBy != null) ...[
+            if (_item.status == 'RESOLVED' ||
+                _item.status == 'REJECTED' ||
+                _item.resolutionNote != null ||
+                _item.resolvedBy != null) ...[
               Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.green.shade300),
+                  side: BorderSide(
+                    color: _item.status == 'REJECTED'
+                        ? Colors.red.shade300
+                        : Colors.green.shade300,
+                  ),
                 ),
                 color: isDark
-                    ? Colors.green.shade900.withAlpha(50)
-                    : Colors.green.shade50,
+                    ? (_item.status == 'REJECTED'
+                        ? Colors.red.shade900.withAlpha(50)
+                        : Colors.green.shade900.withAlpha(50))
+                    : (_item.status == 'REJECTED'
+                        ? Colors.red.shade50
+                        : Colors.green.shade50),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
                           Icon(
-                            Icons.check_circle_outline,
-                            color: Colors.green,
+                            _item.status == 'REJECTED'
+                                ? Icons.cancel_outlined
+                                : Icons.check_circle_outline,
+                            color: _item.status == 'REJECTED'
+                                ? Colors.red
+                                : Colors.green,
                             size: 20,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
-                            'Resolution Details',
+                            _item.status == 'REJECTED'
+                                ? 'Rejection Details'
+                                : 'Resolution Details',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                              color: _item.status == 'REJECTED'
+                                  ? Colors.red
+                                  : Colors.green,
                               fontSize: 15,
                             ),
                           ),
                         ],
                       ),
-                      if (item.resolutionNote != null &&
-                          item.resolutionNote!.isNotEmpty) ...[
+                      if (_item.resolutionNote != null &&
+                          _item.resolutionNote!.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Text(
-                          item.resolutionNote!,
+                          _item.resolutionNote!,
                           style: const TextStyle(height: 1.4),
                         ),
                       ],
-                      if (item.resolvedBy != null) ...[
+                      if (_item.resolvedBy != null) ...[
                         const SizedBox(height: 8),
                         Text(
-                          'Resolved by: ${item.resolvedBy!.name}',
+                          'Resolved by: ${_item.resolvedBy!.name}',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
@@ -207,10 +536,10 @@ class RequestDetailScreen extends StatelessWidget {
                           ),
                         ),
                       ],
-                      if (item.resolvedAt != null) ...[
+                      if (_item.resolvedAt != null) ...[
                         const SizedBox(height: 4),
                         Text(
-                          'Resolved on: ${DateFormat('MMM dd, yyyy • hh:mm a').format(item.resolvedAt!)}',
+                          'Resolved on: ${DateFormat('MMM dd, yyyy • hh:mm a').format(_item.resolvedAt!)}',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey.shade600,
@@ -225,13 +554,13 @@ class RequestDetailScreen extends StatelessWidget {
             ],
 
             // Attachments Section
-            if (item.attachments.isNotEmpty) ...[
+            if (_item.attachments.isNotEmpty) ...[
               const Text(
                 'Attachments',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 12),
-              ...item.attachments.map(
+              ..._item.attachments.map(
                 (url) => _buildAttachmentItem(context, url, isDark),
               ),
               const SizedBox(height: 24),
@@ -243,10 +572,10 @@ class RequestDetailScreen extends StatelessWidget {
   }
 
   Widget _buildBadgesHeader(bool isDark) {
-    Color typeColor = item.isRequest
+    Color typeColor = _item.isRequest
         ? Colors.blue.shade700
         : Colors.deepOrange.shade700;
-    Color typeBg = item.isRequest
+    Color typeBg = _item.isRequest
         ? Colors.blue.shade50
         : Colors.deepOrange.shade50;
     if (isDark) {
@@ -254,7 +583,7 @@ class RequestDetailScreen extends StatelessWidget {
     }
 
     Color priorityColor;
-    switch (item.priority) {
+    switch (_item.priority) {
       case 'URGENT':
         priorityColor = Colors.red.shade700;
         break;
@@ -270,7 +599,7 @@ class RequestDetailScreen extends StatelessWidget {
 
     Color statusColor;
     Color statusBg;
-    switch (item.status) {
+    switch (_item.status) {
       case 'RESOLVED':
         statusColor = Colors.green.shade800;
         statusBg = isDark
@@ -309,7 +638,7 @@ class RequestDetailScreen extends StatelessWidget {
             border: Border.all(color: typeColor.withAlpha(100), width: 1),
           ),
           child: Text(
-            item.type,
+            _item.type,
             style: TextStyle(
               color: typeColor,
               fontWeight: FontWeight.bold,
@@ -332,7 +661,7 @@ class RequestDetailScreen extends StatelessWidget {
               Icon(Icons.flag, size: 12, color: priorityColor),
               const SizedBox(width: 4),
               Text(
-                '${item.priority} PRIORITY',
+                '${_item.priority} PRIORITY',
                 style: TextStyle(
                   color: priorityColor,
                   fontWeight: FontWeight.bold,
@@ -343,20 +672,31 @@ class RequestDetailScreen extends StatelessWidget {
           ),
         ),
 
-        // Status Badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: statusBg,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: statusColor.withAlpha(100), width: 1),
-          ),
-          child: Text(
-            item.status,
-            style: TextStyle(
-              color: statusColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
+        // Status Badge (Clickable to change status)
+        InkWell(
+          onTap: _showChangeStatusDialog,
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusBg,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: statusColor.withAlpha(120), width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _item.status,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.edit_outlined, size: 12, color: statusColor),
+              ],
             ),
           ),
         ),
