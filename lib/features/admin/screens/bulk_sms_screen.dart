@@ -7,9 +7,12 @@ import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
+import 'package:smart_school/features/admin/providers/sms_provider.dart';
+import 'package:smart_school/features/admin/widgets/sms_buy_sheet.dart';
+import 'package:smart_school/features/admin/widgets/sms_campaign_logs_tab.dart';
+import 'package:smart_school/features/admin/widgets/sms_quota_packages_tab.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/student_model.dart';
-import 'package:smart_school/services/sms_service.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 class BulkSmsScreen extends StatefulWidget {
@@ -19,11 +22,14 @@ class BulkSmsScreen extends StatefulWidget {
   State<BulkSmsScreen> createState() => _BulkSmsScreenState();
 }
 
-class _BulkSmsScreenState extends State<BulkSmsScreen> {
+class _BulkSmsScreenState extends State<BulkSmsScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final Set<String> _selectedStudentIds = {};
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
-  final SmsService _smsService = SmsService();
+  final TextEditingController _campaignNameController =
+      TextEditingController(text: 'School Broadcast');
   final ScrollController _scrollController = ScrollController();
 
   bool _isSending = false;
@@ -60,6 +66,10 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
     _scrollController.addListener(_onScroll);
     _messageController.addListener(() {
       setState(() {});
@@ -72,6 +82,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
       }
       context.read<SectionSetupNotifier>().fetchSections();
       context.read<StudentsNotifier>().fetchStudents();
+      context.read<SmsProvider>().initAll();
     });
   }
 
@@ -100,6 +111,8 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
 
   @override
   void dispose() {
+    _tabController.dispose();
+    _campaignNameController.dispose();
     _searchController.dispose();
     _messageController.dispose();
     _scrollController.dispose();
@@ -232,185 +245,279 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
     final partsPerMsg = _calculateSmsParts(message);
     final totalCredits = partsPerMsg * validNumbers.length;
 
+    final smsProvider = context.read<SmsProvider>();
+    final availableBalance = smsProvider.balance;
+    final hasEnoughBalance = availableBalance >= totalCredits;
+
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          padding: const EdgeInsets.all(22),
+          padding: EdgeInsets.fromLTRB(
+            22,
+            16,
+            22,
+            22 + MediaQuery.of(context).viewInsets.bottom,
+          ),
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF1E293B) : Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryAdmin.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryAdmin.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.send_rounded,
+                        color: AppColors.primaryAdmin,
+                        size: 22,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.send_rounded,
-                      color: AppColors.primaryAdmin,
-                      size: 22,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.confirmBulkSmsTitle,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            l10n.reviewCampaignDetails,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      icon: const Icon(Icons.close, size: 20),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Campaign Name Input
+                TextField(
+                  controller: _campaignNameController,
+                  decoration: InputDecoration(
+                    labelText: 'Campaign Name',
+                    hintText: 'e.g. Emergency Weather Notice',
+                    isDense: true,
+                    filled: true,
+                    fillColor: isDark
+                        ? Colors.grey.shade900.withValues(alpha: 0.6)
+                        : Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.campaign_rounded, size: 20),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.grey.shade900.withValues(alpha: 0.6)
+                        : Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color:
+                          isDark ? Colors.grey.shade800 : Colors.grey.shade200,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Column(
+                    children: [
+                      _buildSummaryRow(
+                        icon: Icons.people_alt_rounded,
+                        label: l10n.recipientsLabel,
+                        value: l10n.parentsGuardiansCount(validNumbers.length),
+                        color: Colors.blue,
+                      ),
+                      const Divider(height: 14),
+                      _buildSummaryRow(
+                        icon: Icons.verified_user_rounded,
+                        label: l10n.smsTypeLabel,
+                        value: _smsType == 'Mask SMS'
+                            ? l10n.maskedSchoolCare
+                            : l10n.normalSmsDirectValue,
+                        color: Colors.purple,
+                      ),
+                      const Divider(height: 14),
+                      _buildSummaryRow(
+                        icon: Icons.account_balance_wallet_rounded,
+                        label: 'Available Balance',
+                        value: '$availableBalance Credits',
+                        color: hasEnoughBalance ? Colors.green : Colors.red,
+                      ),
+                      const Divider(height: 14),
+                      _buildSummaryRow(
+                        icon: Icons.receipt_long_rounded,
+                        label: l10n.estimatedSmsCredits,
+                        value: l10n.smsCreditsBreakdown(
+                          totalCredits,
+                          partsPerMsg,
+                          validNumbers.length,
+                        ),
+                        color: hasEnoughBalance ? Colors.teal : Colors.red,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Insufficient Balance Warning
+                if (!hasEnoughBalance) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.shade300),
+                    ),
+                    child: Row(
                       children: [
-                        Text(
-                          l10n.confirmBulkSmsTitle,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
+                        const Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.red,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Insufficient balance! You need $totalCredits credits but have only $availableBalance credits.',
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                        Text(
-                          l10n.reviewCampaignDetails,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, false);
+                            SmsBuySheet.show(context);
+                          },
+                          child: const Text(
+                            'Recharge',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    icon: const Icon(Icons.close, size: 20),
-                  ),
                 ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.grey.shade900.withValues(alpha: 0.6)
-                      : Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+
+                const SizedBox(height: 14),
+                Text(
+                  l10n.messagePreviewLabel,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                child: Column(
+                const SizedBox(height: 6),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color:
+                          isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                    ),
+                  ),
+                  child: Text(
+                    message,
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.4,
+                      color:
+                          isDark ? Colors.grey.shade200 : Colors.grey.shade800,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
                   children: [
-                    _buildSummaryRow(
-                      icon: Icons.people_alt_rounded,
-                      label: l10n.recipientsLabel,
-                      value: l10n.parentsGuardiansCount(validNumbers.length),
-                      color: Colors.blue,
-                    ),
-                    const Divider(height: 16),
-                    _buildSummaryRow(
-                      icon: Icons.verified_user_rounded,
-                      label: l10n.smsTypeLabel,
-                      value: _smsType == 'Mask SMS'
-                          ? l10n.maskedSchoolCare
-                          : l10n.normalSmsDirectValue,
-                      color: Colors.purple,
-                    ),
-                    const Divider(height: 16),
-                    _buildSummaryRow(
-                      icon: Icons.receipt_long_rounded,
-                      label: l10n.estimatedSmsCredits,
-                      value: l10n.smsCreditsBreakdown(
-                        totalCredits,
-                        partsPerMsg,
-                        validNumbers.length,
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(l10n.cancel),
                       ),
-                      color: Colors.teal,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton.icon(
+                        onPressed: hasEnoughBalance
+                            ? () => Navigator.pop(context, true)
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryAdmin,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade300,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        icon: const Icon(Icons.send_rounded, size: 18),
+                        label: Text(
+                          hasEnoughBalance ? l10n.sendNowButton : 'Insufficient Credits',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                l10n.messagePreviewLabel,
-                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 6),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-                  ),
-                ),
-                child: Text(
-                  message,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.4,
-                    color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 13),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(l10n.cancel),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton.icon(
-                      onPressed: () => Navigator.pop(context, true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryAdmin,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 13),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      icon: const Icon(Icons.send_rounded, size: 18),
-                      label: Text(
-                        l10n.sendNowButton,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-            ],
+                const SizedBox(height: 10),
+              ],
+            ),
           ),
         );
       },
@@ -427,10 +534,15 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
       _isSending = true;
     });
 
-    final success = await _smsService.sendBulkSms(
-      numbers,
-      _messageController.text.trim(),
+    final smsProvider = context.read<SmsProvider>();
+    final result = await smsProvider.sendSms(
+      phoneNumbers: numbers,
+      message: _messageController.text.trim(),
+      campaignName: _campaignNameController.text.trim().isEmpty
+          ? 'Emergency Notice'
+          : _campaignNameController.text.trim(),
       isMasked: _smsType == 'Mask SMS',
+      senderId: _smsType == 'Mask SMS' ? 'SchoolCare' : '8809639228875',
     );
 
     setState(() {
@@ -439,7 +551,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
 
     if (!mounted) return;
 
-    if (success) {
+    if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
@@ -450,7 +562,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  l10n.bulkSmsSentSuccess(numbers.length),
+                  result['message'] ?? l10n.bulkSmsSentSuccess(numbers.length),
                 ),
               ),
             ],
@@ -472,7 +584,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  l10n.bulkSmsSentFailed,
+                  result['message'] ?? l10n.bulkSmsSentFailed,
                 ),
               ),
             ],
@@ -502,6 +614,98 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
           style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
         ),
       ],
+    );
+  }
+
+  Widget _buildQuotaBanner(BuildContext context) {
+    final smsProvider = context.watch<SmsProvider>();
+    final balance = smsProvider.balance;
+    final isLow = smsProvider.isLowBalance || balance < 50;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isLow
+            ? Colors.amber.shade900.withValues(alpha: 0.1)
+            : (isDark ? const Color(0xFF1E293B) : Colors.white),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isLow
+              ? Colors.amber.shade700
+              : (isDark ? Colors.grey.shade800 : Colors.grey.shade200),
+          width: isLow ? 1.2 : 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isLow
+                ? Icons.warning_amber_rounded
+                : Icons.account_balance_wallet_rounded,
+            color: isLow ? Colors.amber.shade700 : AppColors.primaryAdmin,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'SMS Quota Balance: ',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color:
+                            isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      ),
+                    ),
+                    Text(
+                      '$balance Credits',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isLow
+                            ? Colors.amber.shade800
+                            : AppColors.primaryAdmin,
+                      ),
+                    ),
+                  ],
+                ),
+                if (isLow)
+                  Text(
+                    'Balance is running low! Recharge to prevent failed broadcasts.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color:
+                          isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => SmsBuySheet.show(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  isLow ? Colors.amber.shade800 : AppColors.primaryAdmin,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              visualDensity: VisualDensity.compact,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Top-up',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -542,6 +746,180 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final studentsNotifier = context.watch<StudentsNotifier>();
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.primaryAdmin,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.bulkSmsBroadcastTitle,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            Text(
+              l10n.bulkSmsBroadcastSubtitle,
+              style: const TextStyle(fontSize: 11, color: Colors.white70),
+            ),
+          ],
+        ),
+        actions: [
+          // Balance quick pill
+          Consumer<SmsProvider>(
+            builder: (context, sms, _) {
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                child: InkWell(
+                  onTap: () => _tabController.animateTo(1),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white30),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.sms_rounded,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          '${sms.balance}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          if (_tabController.index == 0) ...[
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert_rounded),
+              tooltip: l10n.selectionActions,
+              onSelected: (val) {
+                if (val == 'select_valid') {
+                  _selectAllWithContact(studentsNotifier.students);
+                } else if (val == 'select_all') {
+                  setState(() {
+                    for (var s in studentsNotifier.students) {
+                      _selectedStudentIds.add(s.userId);
+                    }
+                  });
+                } else if (val == 'clear') {
+                  _clearSelection();
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'select_valid',
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.mark_email_read_rounded,
+                        size: 18,
+                        color: Colors.teal,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(l10n.selectAllWithPhone),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'select_all',
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.select_all_rounded,
+                        size: 18,
+                        color: Colors.blue,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(l10n.selectAllVisible),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'clear',
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.deselect_rounded,
+                        size: 18,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(l10n.clearSelection),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              tooltip: 'Refresh',
+              onPressed: () {
+                final sms = context.read<SmsProvider>();
+                if (_tabController.index == 1) {
+                  sms.fetchQuotaStatus();
+                  sms.fetchPackages();
+                } else if (_tabController.index == 2) {
+                  sms.fetchCampaignLogs();
+                }
+              },
+            ),
+          ],
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          indicatorWeight: 3,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white60,
+          labelStyle:
+              const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          tabs: const [
+            Tab(icon: Icon(Icons.send_rounded, size: 18), text: 'Broadcast'),
+            Tab(
+              icon: Icon(Icons.account_balance_wallet_rounded, size: 18),
+              text: 'Quota & Bundles',
+            ),
+            Tab(
+              icon: Icon(Icons.history_rounded, size: 18),
+              text: 'Campaign Logs',
+            ),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildBroadcastTab(context),
+          const SmsQuotaPackagesTab(),
+          const SmsCampaignLogsTab(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBroadcastTab(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final classes = context.watch<ClassSetupNotifier>().classes;
     final sections = context.watch<SectionSetupNotifier>().sections;
@@ -570,78 +948,9 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
     final smsParts = _calculateSmsParts(messageText);
     final maxSinglePart = _getMaxCharsSinglePart(messageText);
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primaryAdmin,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.bulkSmsBroadcastTitle,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            Text(
-              l10n.bulkSmsBroadcastSubtitle,
-              style: const TextStyle(fontSize: 11, color: Colors.white70),
-            ),
-          ],
-        ),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_rounded),
-            tooltip: l10n.selectionActions,
-            onSelected: (val) {
-              if (val == 'select_valid') {
-                _selectAllWithContact(studentsNotifier.students);
-              } else if (val == 'select_all') {
-                setState(() {
-                  for (var s in studentsNotifier.students) {
-                    _selectedStudentIds.add(s.userId);
-                  }
-                });
-              } else if (val == 'clear') {
-                _clearSelection();
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'select_valid',
-                child: Row(
-                  children: [
-                    const Icon(Icons.mark_email_read_rounded, size: 18, color: Colors.teal),
-                    const SizedBox(width: 8),
-                    Text(l10n.selectAllWithPhone),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'select_all',
-                child: Row(
-                  children: [
-                    const Icon(Icons.select_all_rounded, size: 18, color: Colors.blue),
-                    const SizedBox(width: 8),
-                    Text(l10n.selectAllVisible),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'clear',
-                child: Row(
-                  children: [
-                    const Icon(Icons.deselect_rounded, size: 18, color: Colors.red),
-                    const SizedBox(width: 8),
-                    Text(l10n.clearSelection),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
+    return Column(
+      children: [
+        _buildQuotaBanner(context),
           // ── Top Filters & Statistics Section ──
           Container(
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
@@ -1021,8 +1330,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
           // ── Bottom SMS Message Composer Panel ──
           _buildComposerPanel(isDark, smsParts, maxSinglePart, studentsWithPhone),
         ],
-      ),
-    );
+      );
   }
 
   // ── Stat Badge Widget ──────────────────────────────────────────────────────
@@ -1377,6 +1685,10 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                   tooltip: l10n.quickTemplateInsertTooltip,
                   onSelected: (template) {
                     _messageController.text = template['text'] ?? '';
+                    if (template['title'] != null &&
+                        template['title']!.isNotEmpty) {
+                      _campaignNameController.text = template['title']!;
+                    }
                   },
                   itemBuilder: (context) => quickTemplates.map((t) {
                     return PopupMenuItem(

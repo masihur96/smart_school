@@ -66,6 +66,7 @@ import 'features/expense_tracking/providers/expense_provider.dart';
 import 'features/library/providers/library_book_provider.dart';
 import 'features/online_class/providers/online_class_provider.dart';
 import 'features/request_box/providers/request_complaint_provider.dart';
+import 'features/admin/providers/sms_provider.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -180,6 +181,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => LibraryBookNotifier()),
         ChangeNotifierProvider(create: (_) => OnlineClassProvider(DataProvider())),
         ChangeNotifierProvider(create: (_) => RequestComplaintProvider()),
+        ChangeNotifierProvider(create: (_) => SmsProvider()),
         ChangeNotifierProxyProvider4<ClassSetupNotifier, SectionSetupNotifier,
             SubjectSetupNotifier, AuthNotifier, OnboardingNotifier>(
           create: (context) => OnboardingNotifier(

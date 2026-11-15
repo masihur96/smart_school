@@ -227,4 +227,12 @@ class APIPath {
     }
     return "$baseUrl/request-complaints/recipients";
   }
+
+  // Bulk SMS
+  static String smsQuotaStatus = "$baseUrl/sms/quota/status";
+  static String smsPackages = "$baseUrl/sms/quota/packages";
+  static String smsBuyQuota = "$baseUrl/sms/quota/buy";
+  static String smsLogs({int page = 1, int limit = 20}) =>
+      "$baseUrl/sms/logs?page=$page&limit=$limit";
+  static String smsSend = "$baseUrl/sms/send";
 }
