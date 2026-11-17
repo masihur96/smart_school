@@ -59,6 +59,10 @@ class _AdminSetupChecklistState extends State<AdminSetupChecklist>
 
     if (!checklist.isLoaded) return const SizedBox.shrink();
     if (checklist.isDismissed) return const SizedBox.shrink();
+    if (checklist.isAllCompleted ||
+        checklist.completedCount >= checklist.totalCount) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),

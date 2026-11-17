@@ -152,7 +152,7 @@ class AdminChecklistProvider extends ChangeNotifier {
 
   void _recalcCompleted() {
     final allDone = steps.every((s) => s.isCompleted);
-    if (allDone && !_isAllCompleted) {
+    if (allDone) {
       _isAllCompleted = true;
       _saveAllCompleted();
     }
@@ -161,6 +161,66 @@ class AdminChecklistProvider extends ChangeNotifier {
   Future<void> _saveAllCompleted() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_checklistCompletedKey, true);
+  }
+
+  /// Syncs steps from existing live data (teachers, students, exams, etc.)
+  void syncWithDashboardData({
+    bool? hasTeachers,
+    bool? hasStudents,
+    bool? hasClasses,
+    bool? hasExams,
+    bool? hasNotices,
+  }) {
+    bool changed = false;
+    if (hasTeachers == true) {
+      final step = steps.firstWhere((s) => s.id == ChecklistStepId.addTeacher);
+      if (!step.isCompleted) {
+        step.isCompleted = true;
+        changed = true;
+      }
+    }
+    if (hasStudents == true) {
+      final step = steps.firstWhere((s) => s.id == ChecklistStepId.addStudent);
+      if (!step.isCompleted) {
+        step.isCompleted = true;
+        changed = true;
+      }
+    }
+    if (hasClasses == true) {
+      final step = steps.firstWhere((s) => s.id == ChecklistStepId.addClass);
+      if (!step.isCompleted) {
+        step.isCompleted = true;
+        changed = true;
+      }
+    }
+    if (hasExams == true) {
+      final step = steps.firstWhere((s) => s.id == ChecklistStepId.addExam);
+      if (!step.isCompleted) {
+        step.isCompleted = true;
+        changed = true;
+      }
+    }
+    if (hasNotices == true) {
+      final step = steps.firstWhere((s) => s.id == ChecklistStepId.addNotice);
+      if (!step.isCompleted) {
+        step.isCompleted = true;
+        changed = true;
+      }
+    }
+    if (changed) {
+      _persistAllSteps();
+      _recalcCompleted();
+      notifyListeners();
+    }
+  }
+
+  Future<void> _persistAllSteps() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (final step in steps) {
+      if (step.isCompleted) {
+        await prefs.setBool('$_prefKeyPrefix${step.id.name}', true);
+      }
+    }
   }
 
   int get completedCount => steps.where((s) => s.isCompleted).length;

@@ -26,10 +26,12 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/services/geocoding_service.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../widgets/admin_setup_checklist.dart';
+import '../widgets/school_setup_guide.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../notifications/providers/notification_provider.dart';
 import '../models/admin_dashboard_model.dart';
+import '../providers/admin_checklist_provider.dart';
 import '../providers/admin_dashboard_provider.dart';
 import '../providers/student_provider.dart';
 import '../providers/teacher_provider.dart';
@@ -593,9 +595,14 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     AppLocalizations l10n,
     AuthNotifier authNotifier,
   ) {
-    return Consumer<AdminDashboardProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading) {
+    return Consumer3<AdminDashboardProvider, TeachersNotifier, StudentsNotifier>(
+      builder: (context, provider, teachersNotifier, studentsNotifier, child) {
+        final isTeachersLoading =
+            teachersNotifier.isLoading && teachersNotifier.teachers.isEmpty;
+        final isStudentsLoading =
+            studentsNotifier.isLoading && studentsNotifier.students.isEmpty;
+
+        if (provider.isLoading || isTeachersLoading || isStudentsLoading) {
           return _buildShimmerLoading(context);
         }
 
@@ -624,6 +631,44 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         final data = provider.dashboardData;
         if (data == null) return const SizedBox.shrink();
 
+        // ── Determine empty-school state ───────────────────────────────
+        final hasTeachers = !teachersNotifier.isLoading &&
+            teachersNotifier.teachers.isNotEmpty;
+        final hasStudents = !studentsNotifier.isLoading &&
+            studentsNotifier.students.isNotEmpty;
+        final isSchoolEmpty = !hasTeachers || !hasStudents;
+
+        final checklist = context.watch<AdminChecklistProvider>();
+        final isAllStepsDone = checklist.isAllCompleted ||
+            checklist.completedCount >= checklist.totalCount;
+
+        // Auto-sync steps with actual data if available
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            context.read<AdminChecklistProvider>().syncWithDashboardData(
+                  hasTeachers: teachersNotifier.teachers.isNotEmpty,
+                  hasStudents: studentsNotifier.students.isNotEmpty,
+                  hasExams: data.currentExam.isNotEmpty,
+                  hasNotices: data.recentNotice.isNotEmpty,
+                );
+          }
+        });
+
+        // ── Show full setup guide instead of normal dashboard ──────────
+        // When all steps are done, no need to show the setup guide!
+        if (isSchoolEmpty && !isAllStepsDone) {
+          return SchoolSetupGuide(
+            hasTeachers: hasTeachers,
+            hasStudents: hasStudents,
+            onRefresh: () {
+              provider.fetchDashboardData();
+              teachersNotifier.fetchTeachers();
+              studentsNotifier.fetchStudents();
+            },
+          );
+        }
+
+        // ── Normal dashboard (school fully set up) ─────────────────────
         if (!_tourInitiated) {
           _checkAndStartTour();
         }
