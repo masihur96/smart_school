@@ -544,6 +544,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_tour_guide:
+    dependency: "direct main"
+    description:
+      path: "packages/flutter_tour_guide"
+      relative: true
+    source: path
+    version: "0.1.2"
   flutter_tts:
     dependency: "direct main"
     description:

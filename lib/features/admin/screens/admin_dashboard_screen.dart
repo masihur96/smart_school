@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:flutter_tour_guide/flutter_tour_guide.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -88,6 +89,109 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   final ScrollController _dailyChartScrollController = ScrollController();
   bool _hasAutoScrolledDailyChart = false;
   double _dailyChartViewportWidth = 300.0;
+
+  final GlobalKey _menuKey = GlobalKey();
+  final GlobalKey _notificationKey = GlobalKey();
+  final GlobalKey _helpTourKey = GlobalKey();
+  final GlobalKey _profileKey = GlobalKey();
+  final GlobalKey _attendanceOverviewKey = GlobalKey();
+  final GlobalKey _attendanceCardsKey = GlobalKey();
+  final GlobalKey _quickAddKey = GlobalKey();
+  final GlobalKey _bottomNavKey = GlobalKey();
+
+  bool _tourInitiated = false;
+
+  void _checkAndStartTour({bool force = false}) {
+    if (!force && _tourInitiated) return;
+    if (!force) _tourInitiated = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        _startTourGuide(force: force);
+      });
+    });
+  }
+
+  Future<void> _startTourGuide({bool force = false}) async {
+    if (!mounted) return;
+    if (_tabController.index != 0) {
+      _tabController.animateTo(0);
+      await Future.delayed(const Duration(milliseconds: 300));
+    }
+    if (!mounted) return;
+
+    final steps = <TourStep>[
+      TourStep(
+        targetKey: _menuKey,
+        title: 'Side Navigation Menu',
+        body: 'Tap here to open the drawer menu and access user management, reports, academic records, and settings.',
+        radius: 28,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _notificationKey,
+        title: 'School Notifications',
+        body: 'Keep track of urgent announcements, staff notices, and student updates in real time.',
+        radius: 28,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _helpTourKey,
+        title: 'Feature Tour Guide',
+        body: 'Tap this help icon anytime you want to replay this interactive overview of your dashboard.',
+        radius: 28,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _profileKey,
+        title: 'Admin Profile',
+        body: 'View or edit your administrator profile details and account preferences.',
+        radius: 28,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _attendanceOverviewKey,
+        title: 'Attendance Analytics',
+        body: 'Monitor daily attendance trends and compare student vs teacher attendance at a glance.',
+        radius: 16,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _attendanceCardsKey,
+        title: 'Attendance Breakdown',
+        body: 'Quickly view presence counts and jump into detailed student or teacher attendance sheets.',
+        radius: 16,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _quickAddKey,
+        title: 'Quick Add Actions',
+        body: 'Tap this action button to instantly add a new student or onboard a new teacher.',
+        radius: 99,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _bottomNavKey,
+        title: 'Quick Navigation Bar',
+        body: 'Seamlessly switch between Home, Students list, Exam management, and Notice board.',
+        radius: 20,
+        padding: 4,
+      ),
+    ];
+
+    await Tour.show(
+      context: context,
+      id: 'admin_dashboard_tour_v1',
+      steps: steps,
+      force: force,
+      theme: const TourTheme(
+        accentColor: AppColors.primaryAdmin,
+        cardRadius: 16,
+        spotlightRadius: 14,
+      ),
+    );
+  }
 
   void _scrollToCurrentDay({
     required int currentDay,
@@ -210,6 +314,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         appBar: AppBar(
           leadingWidth: screenSize(context, .07),
           leading: IconButton(
+            key: _menuKey,
             icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => ZoomDrawer.of(context)?.toggle(),
           ),
@@ -263,8 +368,18 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
           backgroundColor: AppColors.primaryAdmin,
           foregroundColor: Colors.white,
           actions: [
-            NotificationIconButton(color: AppColors.primaryAdmin),
+            NotificationIconButton(
+              key: _notificationKey,
+              color: AppColors.primaryAdmin,
+            ),
             IconButton(
+              key: _helpTourKey,
+              icon: const Icon(Icons.help_outline),
+              tooltip: 'Tour Guide',
+              onPressed: () => _checkAndStartTour(force: true),
+            ),
+            IconButton(
+              key: _profileKey,
               icon: const Icon(Icons.account_circle),
               onPressed: () {
                 Navigator.push(
@@ -339,6 +454,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
             alignment: Alignment.center,
             children: [
               TabBar(
+                key: _bottomNavKey,
                 controller: _tabController,
                 indicatorColor: _primaryColor,
                 labelColor: _primaryColor,
@@ -382,6 +498,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                 child: Theme(
                   data: Theme.of(context).copyWith(),
                   child: PopupMenuButton<int>(
+                    key: _quickAddKey,
                     offset: const Offset(0, -110),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -506,6 +623,10 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         final data = provider.dashboardData;
         if (data == null) return const SizedBox.shrink();
 
+        if (!_tourInitiated) {
+          _checkAndStartTour();
+        }
+
         final onlineClassProvider = context.watch<OnlineClassProvider>();
         final allOnlineClasses = <String, OnlineClass>{};
         for (final c in data.onlineClasses) {
@@ -538,9 +659,15 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildAttendanceOverviewSection(data, provider),
+                KeyedSubtree(
+                  key: _attendanceOverviewKey,
+                  child: _buildAttendanceOverviewSection(data, provider),
+                ),
                 const SizedBox(height: 24),
-                _buildAttendanceCards(data),
+                KeyedSubtree(
+                  key: _attendanceCardsKey,
+                  child: _buildAttendanceCards(data),
+                ),
                 if (upcomingClasses.isNotEmpty) ...[
                   _buildSectionTitle(
                     AppLocalizations.of(context)!.onlineClasses,

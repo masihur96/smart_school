@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:flutter_tour_guide/flutter_tour_guide.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -82,6 +83,101 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
   late TabController _tabController;
   final List<bool> _visitedTabs = [true, false, false, false, false];
   final BottomBarController _bottomBarController = BottomBarController();
+
+  final GlobalKey _menuKey = GlobalKey();
+  final GlobalKey _notificationKey = GlobalKey();
+  final GlobalKey _helpTourKey = GlobalKey();
+  final GlobalKey _aiTutorKey = GlobalKey();
+  final GlobalKey _clockInKey = GlobalKey();
+  final GlobalKey _attendanceSectionKey = GlobalKey();
+  final GlobalKey _bottomNavKey = GlobalKey();
+
+  bool _tourInitiated = false;
+
+  void _checkAndStartTour({bool force = false}) {
+    if (!force && _tourInitiated) return;
+    if (!force) _tourInitiated = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        _startTourGuide(force: force);
+      });
+    });
+  }
+
+  Future<void> _startTourGuide({bool force = false}) async {
+    if (!mounted) return;
+    if (_tabController.index != 0) {
+      _tabController.animateTo(0);
+      await Future.delayed(const Duration(milliseconds: 300));
+    }
+    if (!mounted) return;
+
+    final steps = <TourStep>[
+      TourStep(
+        targetKey: _menuKey,
+        title: 'Side Navigation Menu',
+        body: 'Open the drawer to access courses, syllabus, class routines, student lists, and settings.',
+        radius: 28,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _notificationKey,
+        title: 'School Notices & Alerts',
+        body: 'Stay up to date with urgent messages, staff announcements, and admin notices.',
+        radius: 28,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _helpTourKey,
+        title: 'Feature Tour Guide',
+        body: 'Tap this icon anytime to replay this interactive guide and explore features.',
+        radius: 28,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _aiTutorKey,
+        title: 'AI Teaching Assistant',
+        body: 'Tap here to chat with your AI assistant for lesson plans, homework ideas, and educational questions.',
+        radius: 99,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _clockInKey,
+        title: 'Self Attendance (Clock-In / Out)',
+        body: 'Mark your daily attendance instantly with verified geofencing right from this floating button.',
+        radius: 99,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _attendanceSectionKey,
+        title: 'Attendance Overview',
+        body: 'Review your working hours, check-in timestamps, shift information, and monthly attendance stats.',
+        radius: 16,
+        padding: 6,
+      ),
+      TourStep(
+        targetKey: _bottomNavKey,
+        title: 'Quick Navigation',
+        body: 'Switch between Overview, Student Attendance, Exams evaluation, and Homework review.',
+        radius: 20,
+        padding: 4,
+      ),
+    ];
+
+    await Tour.show(
+      context: context,
+      id: 'teacher_dashboard_tour_v1',
+      steps: steps,
+      force: force,
+      theme: const TourTheme(
+        accentColor: AppColors.primaryTeacher,
+        cardRadius: 16,
+        spotlightRadius: 14,
+      ),
+    );
+  }
 
   int get _selectedIndex => _tabController.index;
 
@@ -181,6 +277,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         appBar: AppBar(
           leadingWidth: screenSize(context, .15),
           leading: IconButton(
+            key: _menuKey,
             icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => ZoomDrawer.of(context)?.toggle(),
           ),
@@ -237,8 +334,18 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           foregroundColor: Colors.white,
           iconTheme: const IconThemeData(color: Colors.white70),
           actions: [
-            NotificationIconButton(color: AppColors.primaryTeacher),
+            NotificationIconButton(
+              key: _notificationKey,
+              color: AppColors.primaryTeacher,
+            ),
+            IconButton(
+              key: _helpTourKey,
+              icon: const Icon(Icons.help_outline),
+              tooltip: 'Tour Guide',
+              onPressed: () => _checkAndStartTour(force: true),
+            ),
             GestureDetector(
+              key: _aiTutorKey,
               onTap: () {
                 _showAIDoctorDialog(context);
                 // Navigate to profile screen
@@ -314,6 +421,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
             alignment: Alignment.center,
             children: [
               TabBar(
+                key: _bottomNavKey,
                 controller: _tabController,
                 indicatorColor: AppColors.primaryTeacher,
                 labelColor: AppColors.primaryTeacher,
@@ -360,6 +468,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     return Theme(
                       data: Theme.of(context).copyWith(),
                       child: GestureDetector(
+                        key: _clockInKey,
                         onTap: () => _performSelfAttendance(
                           context,
                           context.read<AuthNotifier>().user,
@@ -466,6 +575,10 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           ],
         ),
       );
+    }
+
+    if (data != null && !_tourInitiated) {
+      _checkAndStartTour();
     }
 
     return RefreshIndicator(
@@ -589,20 +702,28 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionHeader(
-                    l10n.teacherAttendance,
-                    onSeeAll: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => TeacherSelfAttendanceDetailScreen(
-                            schoolId: user.schoolId ?? "",
-                          ),
+                  KeyedSubtree(
+                    key: _attendanceSectionKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          l10n.teacherAttendance,
+                          onSeeAll: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => TeacherSelfAttendanceDetailScreen(
+                                  schoolId: user.schoolId ?? "",
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                        _buildAttendanceSection(context, data, l10n),
+                      ],
+                    ),
                   ),
-                  _buildAttendanceSection(context, data, l10n),
                   const SizedBox(height: 24),
                   if (data?.myClassAttendStudents.isNotEmpty ?? false) ...[
                     _buildSectionHeader(
