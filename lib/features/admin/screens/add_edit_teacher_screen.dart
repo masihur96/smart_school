@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:smart_school/features/admin/providers/admin_checklist_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -384,6 +385,10 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
               ),
             ),
           );
+          // ── Mark checklist step complete when a new teacher is added ──
+          if (!isEditing) {
+            context.read<AdminChecklistProvider>().onTeacherAdded();
+          }
           Navigator.pop(context);
         }
       } catch (e) {

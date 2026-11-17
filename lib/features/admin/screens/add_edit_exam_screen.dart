@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/features/admin/providers/admin_checklist_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart' hide Teacher;
@@ -796,6 +797,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
             backgroundColor: Colors.green,
           ),
         );
+        // ── Mark checklist step complete when an exam is created ──
+        context.read<AdminChecklistProvider>().onExamCreated();
         Navigator.pop(context);
       }
     } catch (e) {

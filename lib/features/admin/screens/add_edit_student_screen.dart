@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:smart_school/features/admin/providers/admin_checklist_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -337,7 +338,13 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
           );
         }
 
-        if (mounted) Navigator.pop(context);
+        if (mounted) {
+          // ── Mark checklist step complete when a new student is enrolled ──
+          if (widget.student == null) {
+            context.read<AdminChecklistProvider>().onStudentAdded();
+          }
+          Navigator.pop(context);
+        }
       } catch (e) {
         if (mounted) {
           final msg = e is Exception

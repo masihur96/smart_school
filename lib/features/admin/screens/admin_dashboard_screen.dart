@@ -25,6 +25,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/services/geocoding_service.dart';
 import '../../../core/widgets/app_drawer.dart';
+import '../widgets/admin_setup_checklist.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../notifications/providers/notification_provider.dart';
@@ -659,6 +660,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ── Admin Setup Checklist (shown until dismissed) ──
+                const AdminSetupChecklist(),
+
                 KeyedSubtree(
                   key: _attendanceOverviewKey,
                   child: _buildAttendanceOverviewSection(data, provider),

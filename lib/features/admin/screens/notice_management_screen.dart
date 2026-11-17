@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/features/admin/providers/admin_checklist_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -594,6 +595,12 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                         backgroundColor: Colors.green,
                       ),
                     );
+                    // ── Mark checklist step complete when a notice is posted ──
+                    if (submitLabel != 'Update') {
+                      context
+                          .read<AdminChecklistProvider>()
+                          .onNoticePosted();
+                    }
                   }
                 } catch (e) {
                   if (context.mounted) {
