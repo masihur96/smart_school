@@ -12,6 +12,7 @@ class StorageService {
   static const String _homeworkNotifyKey = 'homework_notify';
   static const String _attendanceNotifyKey = 'attendance_notify';
   static const String _biometricEnabledKey = 'biometric_enabled';
+  static const String _hasSeenOnboardingKey = 'has_seen_onboarding';
 
   static const _storage = FlutterSecureStorage();
 
@@ -113,6 +114,16 @@ class StorageService {
   static Future<bool> getBiometricEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_biometricEnabledKey) ?? false;
+  }
+
+  static Future<void> saveHasSeenOnboarding(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hasSeenOnboardingKey, value);
+  }
+
+  static Future<bool> getHasSeenOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_hasSeenOnboardingKey) ?? false;
   }
 
   static Future<void> clearCredential() async {

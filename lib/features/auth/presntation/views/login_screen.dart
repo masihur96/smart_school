@@ -173,6 +173,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (!mounted) return;
+    // Mark onboarding intro as seen so returning users don't see it again
+    await StorageService.saveHasSeenOnboarding(true);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => dashboard),

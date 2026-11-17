@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/utils/storage_service.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/admin/screens/register_school_screen.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/features/onboarding/onboarding_intro_screen.dart';
 import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
 import 'package:smart_school/features/super_admin/screens/super_admin_dashboard_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
@@ -59,6 +61,18 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
+    // Show onboarding intro slides on first launch (before auth check)
+    final hasSeenOnboarding = await StorageService.getHasSeenOnboarding();
+    if (!hasSeenOnboarding && mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const OnboardingIntroScreen()),
+        (route) => false,
+      );
+      return;
+    }
+
+    if (!mounted) return;
     final authNotifier = context.read<AuthNotifier>();
     await authNotifier.checkAuthStatus();
 
